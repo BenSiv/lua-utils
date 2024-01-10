@@ -3,6 +3,7 @@ local split = require("utils").split
 -- Define a module table
 local delimited_files = {}
 
+-- reads a delimited file into a table, assums correct format, loads all data as string
 function delimited_files.readdlm(filename, delimiter, header)
     local file = io.open(filename, "r")
     if not file then

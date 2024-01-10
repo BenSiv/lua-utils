@@ -1,8 +1,9 @@
 -- Define a module table
 local utils = {}
 
--- local lfs = require("lfs")
+local lfs = require("lfs")
 
+-- exposes all functions to global scope
 function using(source)
     module = require(source)
     for name,func in pairs(module) do
@@ -10,6 +11,7 @@ function using(source)
     end
 end
 
+-- splits a string by delimiter to a table
 function split(str, delimiter)
     local result = {}
     local token = ""
@@ -33,6 +35,7 @@ function split(str, delimiter)
     return result
 end
 
+-- repeats a string n times into a new concatenated string
 local function repeat_string(str, n)
     local result = ""
     for i = 1, n do
@@ -41,6 +44,7 @@ local function repeat_string(str, n)
     return result
 end
 
+-- pretty print a table
 local function show_table(table, indent_level)
     indent_level = indent_level or 0
     local indent = repeat_string(" ", 4)
@@ -61,6 +65,7 @@ local function show_table(table, indent_level)
     print(current_indent .. "}")
 end
 
+-- pretty print generic
 function show(object)
     if type(object) ~= "table" then
         print(object)
@@ -69,11 +74,13 @@ function show(object)
     end
 end
 
+-- length alias for the # symbol
 function length(table)
     local len = #table
     return len
 end
 
+-- checks if element in table
 local function in_table(element, some_table)
     local answer = false
     for _, value in pairs(some_table) do
@@ -84,6 +91,7 @@ local function in_table(element, some_table)
     return answer
 end
 
+-- checks if substring in string
 local function in_string(element, some_string)
     local answer = false
     if string.find(some_string, element) then
@@ -94,6 +102,7 @@ local function in_string(element, some_string)
     return answer
 end
 
+-- generic function to check if element in composable type
 function occursin(element, source)
     local answer = false
     if type(source) == "table" then
@@ -107,6 +116,7 @@ function occursin(element, source)
     return answer
 end
 
+-- returns a copy of table
 local function copy_table(table)
     local new_copy = {}
     for key, value in pairs(table) do
@@ -119,6 +129,7 @@ local function copy_table(table)
     return new_copy
 end
 
+-- generic copy
 function copy(source)
     if type(source) == "table" then
         new_copy = copy_table(source)
@@ -128,6 +139,7 @@ function copy(source)
     return new_copy
 end
 
+-- returns new table with replaced value
 function replace(table, old, new)
     local new_table = copy_table(table)
     for i, value in ipairs(new_table) do
@@ -140,6 +152,7 @@ function replace(table, old, new)
     return new_table
 end
 
+-- generic function to return the 0 value of type
 function empty(reference)
     local new_var
 
@@ -171,6 +184,7 @@ local function slice_string(source, start_index, end_index)
     return source:sub(start_index, end_index)
 end
 
+-- generic slice function for composable types
 function slice(source, start_index, end_index)
     if type(source) == "table" then
         result = slice_table(source, start_index, end_index)
@@ -182,6 +196,7 @@ function slice(source, start_index, end_index)
     return result
 end
 
+-- reverse order of composable type, only top level
 function reverse(input)
 
     if type(input) == "string" then
@@ -203,19 +218,20 @@ function reverse(input)
     return reversed
 end
 
--- function readdir(directory)
---     directory = directory or "."
---     local files = {}
---     for file in lfs.dir(directory) do
---         if file ~= "." and file ~= ".." then
---             table.insert(files, file)
---         end
---     end
---     return files
--- end
+function readdir(directory)
+    directory = directory or "."
+    local files = {}
+    for file in lfs.dir(directory) do
+        if file ~= "." and file ~= ".." then
+            table.insert(files, file)
+        end
+    end
+    return files
+end
 
 utils.using = using
 utils.split = split
+utils.repeat_string = repeat_string
 utils.show = show
 utils.show_table = show_table
 utils.length = length
@@ -228,6 +244,7 @@ utils.replace = replace
 utils.empty = empty
 utils.slice = slice
 utils.reverse = reverse
+utils.readdir = readdir
 
 -- Export the module
 return utils
