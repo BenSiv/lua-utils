@@ -229,6 +229,43 @@ function readdir(directory)
     return files
 end
 
+function insert(tbl, element)
+    if type(tbl) ~= "table" then
+        error("Input is not a table")
+    end
+
+    new_tbl = copy_table(tbl)
+
+    table.insert(tbl, element)
+
+    return new_tbl
+end
+
+function keys(tbl)
+    if type(tbl) ~= "table" then
+        error("Input is not a table")
+    end
+
+    local keys = {}
+    for key, _ in pairs(tbl) do
+        table.insert(keys, key)
+    end
+    return keys
+end
+
+function values(tbl)
+    if type(tbl) ~= "table" then
+        error("Input is not a table")
+    end
+
+    local values = {}
+    for _, value in pairs(tbl) do
+        table.insert(values, value)
+    end
+    return values
+end
+
+
 utils.using = using
 utils.split = split
 utils.repeat_string = repeat_string
@@ -245,6 +282,8 @@ utils.empty = empty
 utils.slice = slice
 utils.reverse = reverse
 utils.readdir = readdir
+utils.insert = insert
+utils.keys = keys
 
 -- Export the module
 return utils

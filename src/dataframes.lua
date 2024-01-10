@@ -102,11 +102,11 @@ function transpose(data_table)
     local transposed_table = {}
 
     -- Get the number of rows and columns in the original table
-    local num_rows = length(data_table)
-    local num_columns = length(data_table[1])
+    local num_rows = length(keys(data_table))
+    local num_columns = length(data_table[keys(data_table)[1]])
 
     -- Transpose the table
-    for col_index, col_data in pairs(data_table[1]) do
+    for col_index, col_data in pairs(data_table[keys(data_table)[1]]) do
         transposed_table[col_index] = {}
         for row_index, row_data in pairs(data_table) do
             transposed_table[col_index][row_index] = row_data[col_index]

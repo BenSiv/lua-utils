@@ -40,5 +40,28 @@ function delimited_files.readdlm(filename, delimiter, header)
     return data
 end
 
+-- writes a delimited file from a table
+function delimited_files.writedlm(filename, delimiter, data, header)
+    local file = io.open(filename, "w")
+    if not file then
+        print("Error opening file for writing: " .. filename)
+        return
+    end
+
+    -- Write header line if header is true
+    if header then
+        local header_line = table.concat(keys(data[keys(data)[1]]), delimiter)
+        file:write(header_line .. "\n")
+    end
+
+    -- Write data lines
+    for i, row in ipairs(data) do
+        local line = table.concat(values(row), delimiter)
+        file:write(line .. "\n")
+    end
+
+    file:close()
+end
+
 -- Export the module
 return delimited_files
