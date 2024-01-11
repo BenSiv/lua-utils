@@ -2,6 +2,7 @@
 local utils = {}
 
 local lfs = require("lfs")
+local yaml = require("yaml")
 
 -- exposes all functions to global scope
 function using(source)
@@ -265,6 +266,39 @@ function values(tbl)
     return values
 end
 
+-- function script_path()
+--     local str = debug.getinfo(2, "S").source:sub(2)
+--     return str:match("(.*/)")
+--  end
+
+function dirname(path)
+    local last_sep = path:match(".*/")
+    if last_sep then
+        return slice(path, 1, length(last_sep))
+    else
+        return path
+    end
+end
+
+function sleep(n)
+    local clock = os.clock
+    local t0 = clock()
+    while clock() - t0 <= n do end
+end
+
+function read_yaml(file_path)
+    local file = io.open(file_path, "r")
+    local data
+    if not file then
+        error("Failed to read file: " .. file_path)
+    else
+        local content = file:read("*all")
+        data = yaml.load(content)
+        file:close()
+    end
+    return data
+end
+
 
 utils.using = using
 utils.split = split
@@ -284,6 +318,10 @@ utils.reverse = reverse
 utils.readdir = readdir
 utils.insert = insert
 utils.keys = keys
+-- utils.script_path = script_path
+utils.dirname = dirname
+utils.sleep = sleep
+utils.read_yaml = read_yaml
 
 -- Export the module
 return utils

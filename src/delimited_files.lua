@@ -41,8 +41,15 @@ function delimited_files.readdlm(filename, delimiter, header)
 end
 
 -- writes a delimited file from a table
-function delimited_files.writedlm(filename, delimiter, data, header)
-    local file = io.open(filename, "w")
+function delimited_files.writedlm(filename, delimiter, data, header, append)
+    local file
+
+    if append then
+        file = io.open(filename, "a")
+    else
+        file = io.open(filename, "w")
+    end
+
     if not file then
         print("Error opening file for writing: " .. filename)
         return
