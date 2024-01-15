@@ -117,6 +117,17 @@ function occursin(element, source)
     return answer
 end
 
+-- syntax sugar for match
+function match(what, where)
+    return where:match(what)
+end
+
+-- syntax sugar for gmatch
+function match_all(what, where)
+    local answer = where:gmatch(what)
+    return answer
+end
+
 -- returns a copy of table
 local function copy_table(table)
     local new_copy = {}
@@ -309,6 +320,8 @@ utils.length = length
 utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
+utils.match = match
+utils.match_all = match_all
 utils.copy_table = copy_table
 utils.copy = copy
 utils.replace = replace
