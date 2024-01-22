@@ -3,20 +3,26 @@ require("utils").using("utils")
 -- Define a module table
 local dataframes = {}
 
--- checks if a table has rectagular shape 
-function is_dataframe(data_table)
-    if type(data_table) ~= "table" then
+-- validate if a table is a DataFrame
+function is_dataframe(tbl)
+    if type(tbl) ~= "table" then
+        return false
+    end
+
+    if length(tbl) == 0 then
         return false
     end
 
     local num_columns = nil
-
-    for _, row in ipairs(data_table) do
+    for _, row in ipairs(tbl) do
         if type(row) ~= "table" then
             return false
         end
 
-        local current_num_columns = #row
+        local current_num_columns = 0
+        for _, _ in pairs(row) do
+            current_num_columns = current_num_columns + 1
+        end
 
         if num_columns == nil then
             num_columns = current_num_columns
@@ -56,39 +62,30 @@ function view(data_table)
         return
     end
 
-    data_table = string_keys(data_table)
+    -- Find the maximum width of each column
+    local column_widths = {}
+    for key, _ in pairs(data_table[1]) do
+        local max_width = #key  -- Start with the length of the column name
+        for _, row in ipairs(data_table) do
+            local value = tostring(row[key])
+            max_width = math.max(max_width, #value)
+        end
+        column_widths[key] = max_width
+    end
 
-    local column_names = {}
-    local max_col_width = {}
+    -- Print the header
+    for key, col_width in pairs(column_widths) do
+        io.write("\27[1m" .. string.format("%-" .. col_width .. "s", key) .. "\27[0m\t")
+    end
+    io.write("\n")
 
+    -- Print the data
     for _, row in ipairs(data_table) do
-        for col_name, col_value in pairs(row) do
-            if column_names[col_name] == nil then
-                column_names[col_name] = true
-                max_col_width[col_name] = length(col_name)
-            end
-
-            local col_value_length = length(tostring(col_value)) 
-            max_col_width[col_name] = math.max(max_col_width[col_name], col_value_length)
+        for key, col_width in pairs(column_widths) do
+            local value = tostring(row[key])
+            io.write(string.format("%-" .. col_width .. "s", value) .. "\t")
         end
-    end
-
-    -- Calculate the number of '-' characters per column
-    local num_dashes_per_column = 5
-
-    -- Print column names
-    for col_name, _ in pairs(column_names) do
-        io.write(col_name .. string.rep(" ", max_col_width[col_name] - length(col_name) + num_dashes_per_column))
-    end
-    print("\n" .. string.rep("-", num_dashes_per_column * length(column_names)))
-
-    -- Print data
-    for i, row in ipairs(data_table) do
-        for col_name, _ in pairs(column_names) do
-            local value = row[col_name] or ""
-            io.write(tostring(value) .. string.rep(" ", max_col_width[col_name] - length(value) + num_dashes_per_column))
-        end
-        print()
+        io.write("\n")
     end
 end
 
@@ -100,10 +97,6 @@ function transpose(data_table)
     end
 
     local transposed_table = {}
-
-    -- Get the number of rows and columns in the original table
-    local num_rows = length(keys(data_table))
-    local num_columns = length(data_table[keys(data_table)[1]])
 
     -- Transpose the table
     for col_index, col_data in pairs(data_table[keys(data_table)[1]]) do

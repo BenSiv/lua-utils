@@ -278,9 +278,9 @@ function values(tbl)
 end
 
 -- function script_path()
---     local str = debug.getinfo(2, "S").source:sub(2)
+--     local str = debug.getinfo(1, "S").source:sub(2)
 --     return str:match("(.*/)")
---  end
+-- end
 
 function dirname(path)
     local last_sep = path:match(".*/")
