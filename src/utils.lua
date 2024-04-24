@@ -12,6 +12,19 @@ function using(source)
     end
 end
 
+-- read file content
+function read(path)
+    local file = io.open(path, "r")
+    local content = nil
+    if file then
+        content = file:read("*all")
+        file:close()
+    else
+        print("Failed to open " .. path)
+    end
+    return content
+end
+
 -- splits a string by delimiter to a table
 function split(str, delimiter)
     local result = {}
@@ -312,6 +325,7 @@ end
 
 
 utils.using = using
+utils.read = read
 utils.split = split
 utils.repeat_string = repeat_string
 utils.show = show
