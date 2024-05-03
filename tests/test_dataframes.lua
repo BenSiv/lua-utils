@@ -1,6 +1,6 @@
 
-package.path = "/home/bensiv/Documents/lua-utils/src/?.lua;" .. package.path
-local dataframes = require("dataframes")
+require("utils").using("utils")
+using("dataframes")
 
 -- Testing is_dataframe function
 local test_data1 = {
@@ -26,5 +26,5 @@ print()
 -- Testing transpose function
 local transposed_data = transpose(test_data1)
 print("transpose Test:")
-view(transposed_data)
+show(transposed_data)
 print()

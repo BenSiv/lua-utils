@@ -65,10 +65,10 @@ function view(data_table)
     -- Find the maximum width of each column
     local column_widths = {}
     for key, _ in pairs(data_table[1]) do
-        local max_width = #key  -- Start with the length of the column name
+        local max_width = length(key)
         for _, row in ipairs(data_table) do
             local value = tostring(row[key])
-            max_width = math.max(max_width, #value)
+            max_width = math.max(max_width, length(value))
         end
         column_widths[key] = max_width
     end

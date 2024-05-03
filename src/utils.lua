@@ -345,6 +345,7 @@ utils.reverse = reverse
 utils.readdir = readdir
 utils.insert = insert
 utils.keys = keys
+utils.values = values
 -- utils.script_path = script_path
 utils.dirname = dirname
 utils.sleep = sleep
