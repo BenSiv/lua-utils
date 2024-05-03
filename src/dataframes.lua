@@ -64,13 +64,13 @@ function view(data_table)
 
     -- Find the maximum width of each column
     local column_widths = {}
-    for key, _ in pairs(data_table[1]) do
-        local max_width = length(key)
-        for _, row in ipairs(data_table) do
-            local value = tostring(row[key])
-            max_width = math.max(max_width, length(value))
+    for _, row in ipairs(data_table) do
+        for key, value in pairs(row) do
+            local width = length(tostring(value))
+            if not column_widths[key] or width > column_widths[key] then
+                column_widths[key] = width
+            end
         end
-        column_widths[key] = max_width
     end
 
     -- Print the header
@@ -82,7 +82,7 @@ function view(data_table)
     -- Print the data
     for _, row in ipairs(data_table) do
         for key, col_width in pairs(column_widths) do
-            local value = tostring(row[key])
+            local value = row[key] or ""
             io.write(string.format("%-" .. col_width .. "s", value) .. "\t")
         end
         io.write("\n")

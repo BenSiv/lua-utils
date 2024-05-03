@@ -68,7 +68,11 @@ local function show_table(table, indent_level)
     local current_indent = repeat_string(indent, indent_level)
     for key, value in pairs(table) do
         if type(value) ~= "table" then
-            print(current_indent .. key .. " = " .. value)
+            if type(value) == "boolean" then
+                print(current_indent .. key .. " = " .. tostring(value))
+            else
+                print(current_indent .. key .. " = " .. value)
+            end
         else
             print(current_indent .. key .. " = ")
             show_table(value, indent_level)
@@ -78,6 +82,7 @@ local function show_table(table, indent_level)
     local current_indent = repeat_string(indent, indent_level)
     print(current_indent .. "}")
 end
+
 
 -- pretty print generic
 function show(object)
@@ -154,6 +159,7 @@ local function copy_table(table)
     return new_copy
 end
 
+
 -- generic copy
 function copy(source)
     if type(source) == "table" then
@@ -169,7 +175,7 @@ function replace(table, old, new)
     local new_table = copy_table(table)
     for i, value in ipairs(new_table) do
         if type(value) == "table" then
-            replace(value, old, new)
+            new_table[i] = replace(value, old, new)
         elseif value == old then
             new_table[i] = new
         end
