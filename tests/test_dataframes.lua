@@ -9,6 +9,12 @@ local test_data1 = {
     {name = "Charlie", age = 22}
 }
 
+local test_data1 = {
+    {name = "Alice", age = 25, date = "24.05.2023"},
+    {name = "Bob", age = 30},
+    {name = "Charlie", age = 22}
+}
+
 local test_data2 = {
     {name = "Dave", age = 28},
     {name = "Eva", age = 35},

@@ -1,4 +1,4 @@
-local split = require("utils").split
+require("utils").using("utils")
 
 -- Define a module table
 local delimited_files = {}
@@ -12,6 +12,7 @@ function delimited_files.readdlm(filename, delimiter, header)
     end
 
     local data = {}
+    local cols = {}
     local line_count = 1
 
     for line in file:lines() do
@@ -19,13 +20,19 @@ function delimited_files.readdlm(filename, delimiter, header)
 
         if header and line_count == 1 then
             -- Use the first line as keys
-            keys = fields
+            cols = fields
         else
             -- If not a header line or header is false, use numeric indices
             local entry = {}
             for i, value in ipairs(fields) do
+                -- Check if the value can be converted to a number
+                local num_value = tonumber(value)
+                if num_value then
+                    value = num_value
+                end
+
                 if header then
-                    entry[keys[i]] = value
+                    entry[cols[i]] = value
                 else
                     table.insert(entry, value)
                 end

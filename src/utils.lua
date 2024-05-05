@@ -59,14 +59,14 @@ local function repeat_string(str, n)
 end
 
 -- pretty print a table
-local function show_table(table, indent_level)
+local function show_table(tbl, indent_level)
     indent_level = indent_level or 0
     local indent = repeat_string(" ", 4)
     local current_indent = repeat_string(indent, indent_level)
     print(current_indent .. "{")
     indent_level = indent_level + 1
     local current_indent = repeat_string(indent, indent_level)
-    for key, value in pairs(table) do
+    for key, value in pairs(tbl) do
         if type(value) ~= "table" then
             if type(value) == "boolean" then
                 print(current_indent .. key .. " = " .. tostring(value))
@@ -94,8 +94,8 @@ function show(object)
 end
 
 -- length alias for the # symbol
-function length(table)
-    local len = #table
+function length(tbl)
+    local len = #tbl
     return len
 end
 
@@ -147,9 +147,9 @@ function match_all(what, where)
 end
 
 -- returns a copy of table
-local function copy_table(table)
+local function copy_table(tbl)
     local new_copy = {}
-    for key, value in pairs(table) do
+    for key, value in pairs(tbl) do
         if type(value) == "table" then
             new_copy[key] = copy_table(value)
         else
@@ -171,13 +171,16 @@ function copy(source)
 end
 
 -- returns new table with replaced value
-function replace(table, old, new)
+function replace(tbl, old, new)
     local new_table = copy_table(table)
-    for i, value in ipairs(new_table) do
+    -- local new_table = {}
+    for key, value in pairs(tbl) do
         if type(value) == "table" then
-            new_table[i] = replace(value, old, new)
+            new_table[key] = replace(value, old, new)
         elseif value == old then
-            new_table[i] = new
+            new_table[key] = new
+        -- else
+        --     new_table[key] = value
         end
     end
     return new_table

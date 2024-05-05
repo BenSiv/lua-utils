@@ -82,7 +82,7 @@ function view(data_table)
     -- Print the data
     for _, row in ipairs(data_table) do
         for key, col_width in pairs(column_widths) do
-            local value = row[key] or ""
+            local value = tostring(row[key]) or ""
             io.write(string.format("%-" .. col_width .. "s", value) .. "\t")
         end
         io.write("\n")
