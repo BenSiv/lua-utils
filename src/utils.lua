@@ -25,30 +25,6 @@ function read(path)
     return content
 end
 
--- splits a string by delimiter to a table
-function split(str, delimiter)
-    local result = {}
-    local token = ""
-    local start = 1
-    local pos = 1
-    
-    while pos <= length(str) do
-        local char = str:sub(pos, pos)
-        if char == delimiter then
-            table.insert(result, token)
-            start = pos + 1
-            token = ""
-        else
-            token = token .. char
-        end
-        pos = pos + 1
-    end
-
-    table.insert(result, token)
-
-    return result
-end
-
 -- repeats a string n times into a new concatenated string
 local function repeat_string(str, n)
     local result = ""
@@ -159,7 +135,6 @@ local function copy_table(tbl)
     return new_copy
 end
 
-
 -- generic copy
 function copy(source)
     if type(source) == "table" then
@@ -172,15 +147,14 @@ end
 
 -- returns new table with replaced value
 function replace(tbl, old, new)
-    local new_table = copy_table(table)
-    -- local new_table = {}
+    local new_table = {}
     for key, value in pairs(tbl) do
         if type(value) == "table" then
             new_table[key] = replace(value, old, new)
         elseif value == old then
             new_table[key] = new
-        -- else
-        --     new_table[key] = value
+        else
+            new_table[key] = value
         end
     end
     return new_table
@@ -227,6 +201,32 @@ function slice(source, start_index, end_index)
     else
         error("ERROR: can't slice element of type: " .. type(source))
     end
+    return result
+end
+
+-- splits a string by delimiter to a table
+function split(str, delimiter)
+    local result = {}
+    local token = ""
+    local pos = 1
+
+    while pos <= length(str) do
+        local char = str:sub(pos, pos)
+        if char == delimiter then
+            if token ~= "" then
+                table.insert(result, token)
+                token = ""
+            end
+        else
+            token = token .. char
+        end
+        pos = pos + 1
+    end
+
+    if token ~= "" then
+        table.insert(result, token)
+    end
+
     return result
 end
 
