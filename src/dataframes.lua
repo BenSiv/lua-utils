@@ -109,9 +109,49 @@ function transpose(data_table)
     return transposed_table
 end
 
+-- Function to group data by a specified key
+function groupby(data, key)
+    local groups = {}
+    for _, entry in ipairs(data) do
+        local group_key = entry[key]
+        if not groups[group_key] then
+            groups[group_key] = {}
+        end
+        table.insert(groups[group_key], entry)
+    end
+    return groups
+end
+
+-- Function to sum values in a table
+function sum_values(data, key)
+    local total = 0
+    for _, entry in ipairs(data) do
+        total = total + entry[key]
+    end
+    return total
+end
+
+-- Function to compute the mean of values in a table
+function mean_values(data, key)
+    local total = 0
+    local count = 0
+    for _, entry in ipairs(data) do
+        total = total + entry[key]
+        count = count + 1
+    end
+    if count > 0 then
+        return total / count
+    else
+        return 0
+    end
+end
+
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
 dataframes.transpose = transpose
+dataframes.groupby = groupby
+dataframes.sum_values = sum_values
+dataframes.mean_values = mean_values
 
 -- Export the module
 return dataframes

@@ -39,6 +39,9 @@ function delimited_files.readdlm(filename, delimiter, header)
     local line_count = 1
 
     for line in file:lines() do
+        -- Remove trailing '\r' character from line end
+        line = slice(line, 1, length(line)-1)
+
         local fields = dlm_split(line, delimiter)
 
         if header and line_count == 1 then
