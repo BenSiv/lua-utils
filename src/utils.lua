@@ -333,6 +333,67 @@ function read_yaml(file_path)
 end
 
 
+-- Merge function to merge two sorted arrays
+local function merge(left, right)
+    local result = {}
+    local left_index, right_index = 1, 1
+
+    while left_index <= length(left) and right_index <= length(right) do
+        if left[left_index] < right[right_index] then
+            table.insert(result, left[left_index])
+            left_index = left_index + 1
+        else
+            table.insert(result, right[right_index])
+            right_index = right_index + 1
+        end
+    end
+
+    -- Append remaining elements from left array
+    while left_index <= length(left) do
+        table.insert(result, left[left_index])
+        left_index = left_index + 1
+    end
+
+    -- Append remaining elements from right array
+    while right_index <= length(right) do
+        table.insert(result, right[right_index])
+        right_index = right_index + 1
+    end
+
+    return result
+end
+
+-- Merge Sort function
+local function merge_sort(array)
+    local len_array = length(array)
+
+    -- Base case: If array has one or zero elements, it's already sorted
+    if len_array <= 1 then
+        return array
+    end
+
+    -- Split the array into two halves
+    local middle = math.floor(len_array / 2)
+    local left = {}
+    local right = {}
+
+    for i = 1, middle do
+        table.insert(left, array[i])
+    end
+
+    for i = middle + 1, len_array do
+        table.insert(right, array[i])
+    end
+
+    -- Recursively sort both halves
+    left = merge_sort(left)
+    right = merge_sort(right)
+
+    -- Merge the sorted halves
+    return merge(left, right)
+end
+
+
 utils.using = using
 utils.read = read
 utils.split = split
@@ -359,6 +420,7 @@ utils.values = values
 utils.dirname = dirname
 utils.sleep = sleep
 utils.read_yaml = read_yaml
+utils.merge_sort = merge_sort
 
 -- Export the module
 return utils

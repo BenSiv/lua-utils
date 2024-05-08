@@ -3,6 +3,11 @@ require("utils").using("utils")
 -- Define a module table
 local dataframes = {}
 
+-- dataframe definition:
+-- 2 dimentional and rectangular table (same number of columns in each row)
+-- first keys are rows of type integer
+-- second keys are columns of type string
+
 -- Validate if a table is a DataFrame
 function is_dataframe(tbl)
     if type(tbl) ~= "table" then
@@ -14,13 +19,20 @@ function is_dataframe(tbl)
     end
 
     local num_columns = nil
-    for _, row in ipairs(tbl) do
-        if type(row) ~= "table" then
+    for index, row in pairs(tbl) do
+        local valid_row_content = type(row) == "table"
+        local valid_row_index = type(index) == "number"
+        if not valid_row_content and not valid_row_index then
             return false
         end
 
         local current_num_columns = 0
-        for _, _ in pairs(row) do
+        for col_name, col_value in pairs(row) do
+            local valid_col_name = type(col_name) == "string"
+            local valid_col_value = type(col_value) == "number" or type(col_value) == "string"
+            if not valid_col_name and not valid_col_value then
+                return false
+            end
             current_num_columns = current_num_columns + 1
         end
 
@@ -147,12 +159,47 @@ function mean_values(data, key)
     end
 end
 
+-- Function to sort a table by the values of a specific key
+local function sort_table_by_key(tbl, key)
+    local function compare(a, b)
+        return a[key] < b[key]
+    end
+    table.sort(tbl, compare)
+    return tbl
+end
+
+-- Function to sort a table by multiple keys
+local function sort_table_by_multiple_keys(tbl, keys)
+    table.sort(tbl, function(a, b)
+        for _, key in ipairs(keys) do
+            if a[key] ~= b[key] then
+                return a[key] < b[key]
+            end
+        end
+        return false
+    end)
+end
+
+-- Function to sort a table based on input arguments
+function sort(tbl, keys)
+    if type(keys) == "string" then
+        -- If keys is a string, perform single-key sort
+        sort_table_by_key(tbl, keys)
+    elseif type(keys) == "table" then
+        -- If keys is a table, perform multiple-key sort
+        sort_table_by_multiple_keys(tbl, keys)
+    else
+        print("Invalid keys argument")
+    end
+end
+
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
 dataframes.transpose = transpose
 dataframes.groupby = groupby
 dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
+dataframes.sort = sort
 
 -- Export the module
 return dataframes
