@@ -393,6 +393,86 @@ local function merge_sort(array)
     return merge(left, right)
 end
 
+-- Merge function to merge two sorted arrays along with their indices
+local function merge_with_indices(left, right)
+    local result = {}
+    local left_index, right_index = 1, 1
+
+    while left_index <= length(left) and right_index <= length(right) do
+        if left[left_index].value < right[right_index].value then
+            table.insert(result, left[left_index])
+            left_index = left_index + 1
+        else
+            table.insert(result, right[right_index])
+            right_index = right_index + 1
+        end
+    end
+
+    -- Append remaining elements from left array
+    while left_index <= length(left) do
+        table.insert(result, left[left_index])
+        left_index = left_index + 1
+    end
+
+    -- Append remaining elements from right array
+    while right_index <= length(right) do
+        table.insert(result, right[right_index])
+        right_index = right_index + 1
+    end
+
+    return result
+end
+
+-- Merge Sort function along with indices
+local function merge_sort_with_indices(array, inner)
+    local len_array = length(array)
+
+    if not inner then
+        for i = 1, len_array do
+            array[i] =  {value = array[i], index = i}
+        end
+    end
+
+    -- Base case: If array has one or zero elements, it's already sorted
+    if len_array <= 1 then
+        return array
+    end
+
+    -- Split the array into two halves
+    local middle = math.floor(len_array / 2)
+    local left = {}
+    local right = {}
+
+    for i = 1, middle do
+        -- left[i] = array[i]
+        -- table.insert(left, {value = array[i], index = i})
+        table.insert(left, array[i])
+    end
+
+    for i = middle + 1, len_array do
+        -- right[i] = array[i]
+        -- table.insert(right, {value = array[i], index = i})
+        table.insert(right, array[i])
+
+    end
+
+    -- Recursively sort both halves
+    left = merge_sort_with_indices(left, true)
+    right = merge_sort_with_indices(right, true)
+
+    -- Merge the sorted halves
+    return merge_with_indices(left, right)
+end
+
+-- Function to get the indices of sorted values
+local function get_sorted_indices(array)
+    local sorted_with_indices = merge_sort_with_indices(array)
+    local indices = {}
+    for _, item in ipairs(sorted_with_indices) do
+        table.insert(indices, item.index)
+    end
+    return indices
+end
 
 utils.using = using
 utils.read = read
@@ -421,6 +501,8 @@ utils.dirname = dirname
 utils.sleep = sleep
 utils.read_yaml = read_yaml
 utils.merge_sort = merge_sort
+utils.merge_sort_with_indices = merge_sort_with_indices
+utils.get_sorted_indices = get_sorted_indices
 
 -- Export the module
 return utils

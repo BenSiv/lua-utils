@@ -159,39 +159,34 @@ function mean_values(data, key)
     end
 end
 
--- Function to sort a table by the values of a specific key
-local function sort_table_by_key(tbl, key)
-    local function compare(a, b)
-        return a[key] < b[key]
+-- Function to sort a table by the values of a specific column
+local function sort_by(tbl, col)
+    local to_sort = {}
+    for _, row in pairs(tbl) do
+        local value = row[col]
+        table.insert(to_sort, value)
     end
-    table.sort(tbl, compare)
-    return tbl
-end
 
--- Function to sort a table by multiple keys
-local function sort_table_by_multiple_keys(tbl, keys)
-    table.sort(tbl, function(a, b)
-        for _, key in ipairs(keys) do
-            if a[key] ~= b[key] then
-                return a[key] < b[key]
-            end
-        end
-        return false
-    end)
+    local indices = get_sorted_indices(to_sort)
+    local sorted_table = {}
+    for _, row_index in pairs(indices) do
+        table.insert(sorted_table, tbl[row_index])
+    end
+    return sorted_table
 end
 
 -- Function to sort a table based on input arguments
-function sort(tbl, keys)
-    if type(keys) == "string" then
-        -- If keys is a string, perform single-key sort
-        sort_table_by_key(tbl, keys)
-    elseif type(keys) == "table" then
-        -- If keys is a table, perform multiple-key sort
-        sort_table_by_multiple_keys(tbl, keys)
-    else
-        print("Invalid keys argument")
-    end
-end
+-- function sort(tbl, keys)
+--     if type(keys) == "string" then
+--         -- If keys is a string, perform single-key sort
+--         sort_table_by_key(tbl, keys)
+--     elseif type(keys) == "table" then
+--         -- If keys is a table, perform multiple-key sort
+--         sort_table_by_multiple_keys(tbl, keys)
+--     else
+--         print("Invalid keys argument")
+--     end
+-- end
 
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
@@ -199,7 +194,7 @@ dataframes.transpose = transpose
 dataframes.groupby = groupby
 dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
-dataframes.sort = sort
+dataframes.sort_by = sort_by
 
 -- Export the module
 return dataframes

@@ -1,4 +1,6 @@
 
+require("utils").using("utils")
+
 -- Test the replace function
 local input_table = {
     "test",
@@ -13,3 +15,6 @@ local old_value = 123
 local new_value = "replaced"
 
 local output_table = replace(input_table, old_value, new_value)
+
+unsorted_array = {5, 3, 8, 1, 2, 7, 4, 6}
+show(merge_sort_with_indices(unsorted_array))
