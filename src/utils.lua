@@ -4,7 +4,7 @@ local utils = {}
 local lfs = require("lfs")
 local yaml = require("yaml")
 
--- exposes all functions to global scope
+-- Exposes all functions to global scope
 function using(source)
     module = require(source)
     for name,func in pairs(module) do
@@ -12,7 +12,7 @@ function using(source)
     end
 end
 
--- read file content
+-- Read file content
 function read(path)
     local file = io.open(path, "r")
     local content = nil
@@ -25,7 +25,7 @@ function read(path)
     return content
 end
 
--- repeats a string n times into a new concatenated string
+-- Repeats a string n times into a new concatenated string
 local function repeat_string(str, n)
     local result = ""
     for i = 1, n do
@@ -34,7 +34,7 @@ local function repeat_string(str, n)
     return result
 end
 
--- pretty print a table
+-- Pretty print a table
 local function show_table(tbl, indent_level)
     indent_level = indent_level or 0
     local indent = repeat_string(" ", 4)
@@ -60,7 +60,7 @@ local function show_table(tbl, indent_level)
 end
 
 
--- pretty print generic
+-- Pretty print generic
 function show(object)
     if type(object) ~= "table" then
         print(object)
@@ -69,13 +69,13 @@ function show(object)
     end
 end
 
--- length alias for the # symbol
+-- Length alias for the # symbol
 function length(tbl)
     local len = #tbl
     return len
 end
 
--- checks if element in table
+-- Checks if element in table
 local function in_table(element, some_table)
     local answer = false
     for _, value in pairs(some_table) do
@@ -86,7 +86,7 @@ local function in_table(element, some_table)
     return answer
 end
 
--- checks if substring in string
+-- Checks if substring in string
 local function in_string(element, some_string)
     local answer = false
     if string.find(some_string, element) then
@@ -97,7 +97,7 @@ local function in_string(element, some_string)
     return answer
 end
 
--- generic function to check if element in composable type
+-- Generic function to check if element in composable type
 function occursin(element, source)
     local answer = false
     if type(source) == "table" then
@@ -111,18 +111,18 @@ function occursin(element, source)
     return answer
 end
 
--- syntax sugar for match
+-- Syntax sugar for match
 function match(what, where)
     return where:match(what)
 end
 
--- syntax sugar for gmatch
+-- Syntax sugar for gmatch
 function match_all(what, where)
     local answer = where:gmatch(what)
     return answer
 end
 
--- returns a copy of table
+-- Returns a copy of table
 local function copy_table(tbl)
     local new_copy = {}
     for key, value in pairs(tbl) do
@@ -135,7 +135,7 @@ local function copy_table(tbl)
     return new_copy
 end
 
--- generic copy
+-- Generic copy
 function copy(source)
     if type(source) == "table" then
         new_copy = copy_table(source)
@@ -145,7 +145,7 @@ function copy(source)
     return new_copy
 end
 
--- returns new table with replaced value
+-- Returns new table with replaced value
 function replace(tbl, old, new)
     local new_table = {}
     for key, value in pairs(tbl) do
@@ -160,7 +160,7 @@ function replace(tbl, old, new)
     return new_table
 end
 
--- generic function to return the 0 value of type
+-- Generic function to return the 0 value of type
 function empty(reference)
     local new_var
 
@@ -192,7 +192,7 @@ local function slice_string(source, start_index, end_index)
     return source:sub(start_index, end_index)
 end
 
--- generic slice function for composable types
+-- Generic slice function for composable types
 function slice(source, start_index, end_index)
     if type(source) == "table" then
         result = slice_table(source, start_index, end_index)
@@ -204,7 +204,7 @@ function slice(source, start_index, end_index)
     return result
 end
 
--- splits a string by delimiter to a table
+-- Splits a string by delimiter to a table
 function split(str, delimiter)
     local result = {}
     local token = ""
@@ -230,7 +230,7 @@ function split(str, delimiter)
     return result
 end
 
--- reverse order of composable type, only top level
+-- Reverse order of composable type, only top level
 function reverse(input)
 
     if type(input) == "string" then

@@ -3,7 +3,7 @@ require("utils").using("utils")
 -- Define a module table
 local dataframes = {}
 
--- validate if a table is a DataFrame
+-- Validate if a table is a DataFrame
 function is_dataframe(tbl)
     if type(tbl) ~= "table" then
         return false
@@ -34,6 +34,7 @@ function is_dataframe(tbl)
     return true
 end
 
+-- Converts all keys to a string type
 function string_keys(obj)
     if type(obj) ~= "table" then
         return obj
@@ -55,7 +56,7 @@ function string_keys(obj)
     return new_table
 end
 
--- pretty print a dataframe
+-- Pretty print a dataframe
 function view(data_table)
     if not is_dataframe(data_table) then
         print("Not a valid dataframe.")
@@ -89,7 +90,7 @@ function view(data_table)
     end
 end
 
--- transposes a dataframe
+-- Transposes a dataframe
 function transpose(data_table)
     if not is_dataframe(data_table) then
         print("Not a valid dataframe.")

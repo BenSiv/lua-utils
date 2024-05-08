@@ -26,7 +26,7 @@ local function dlm_split(str, delimiter)
     return result
 end
 
--- reads a delimited file into a table, assums correct format, loads all data as string
+-- Reads a delimited file into a table, assums correct format, loads all data as string
 function delimited_files.readdlm(filename, delimiter, header)
     local file = io.open(filename, "r")
     if not file then
@@ -40,7 +40,7 @@ function delimited_files.readdlm(filename, delimiter, header)
 
     for line in file:lines() do
         -- Remove trailing '\r' character from line end
-        line = slice(line, 1, length(line)-1)
+        line = string.gsub(line, "\r$", "")
 
         local fields = dlm_split(line, delimiter)
 
@@ -73,7 +73,7 @@ function delimited_files.readdlm(filename, delimiter, header)
     return data
 end
 
--- writes a delimited file from a table
+-- Writes a delimited file from a table
 function delimited_files.writedlm(filename, delimiter, data, header, append)
     local file
 
