@@ -15,25 +15,28 @@ function convert_date_format(input_date)
     return output_date
 end
 
-function get_year(date)
-    local year = date:sub(1, 4)
-    return year
-end
-
-function get_month(date)
-    local month = date:sub(6, 7)
-    return month
-end
-
-function get_day(date)
-    local day = date:sub(9, 10)
-    return day
+function date_range(first_date, last_date, unit, interval)
+	local full_date_range = {}
+	local current_date = first_date
+	table.insert(full_date_range, current_date)
+	while current_date ~= last_date do
+		local year, month, day = current_date:match("(%d+)-(%d+)-(%d+)")
+        if unit == "day" then
+		    current_date = os.date("%Y-%m-%d", os.time{year=year, month=month, day=day+interval})
+        elseif unit == "month" then
+		    current_date = os.date("%Y-%m-%d", os.time{year=year, month=month+interval, day=day})
+        elseif unit == "year" then
+		    current_date = os.date("%Y-%m-%d", os.time{year=year+interval, month=month, day=day})
+        else
+            print("Unknown time unit")
+        end
+		table.insert(full_date_range, current_date)
+	end
+    return full_date_range
 end
 
 dates.convert_date_format = convert_date_format
-dates.get_year = get_year
-dates.get_month = get_month
-dates.get_day = get_day
+dates.date_range = date_range
 
 -- Export the module
 return dates

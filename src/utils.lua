@@ -75,6 +75,12 @@ function length(tbl)
     return len
 end
 
+-- Round a number
+function round(value, decimal)
+    local factor = 10 ^ (decimal or 0)
+    return math.floor(value * factor + 0.5) / factor
+end
+
 -- Checks if element in table
 local function in_table(element, some_table)
     local answer = false
