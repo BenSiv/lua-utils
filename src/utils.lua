@@ -480,6 +480,42 @@ local function get_sorted_indices(array)
     return indices
 end
 
+local function apply(func, tbl, level, key, _current_level)
+    _current_level = _current_level or 0
+    level = level or 0
+    local result = {}
+    if _current_level < level then
+        for k,v in pairs(tbl) do
+            table.insert(result, apply(func, tbl[k], level, key, _current_level+1))
+        end
+    else
+        if not key then
+            for k,v in pairs(tbl) do
+                result[k] = func(v)
+            end
+        elseif type(key) == "number" or type(key) == "string" then
+            for k,v in pairs(tbl) do
+                if k == key then
+                    result[key] = func(v)
+                else
+                    result[k] = v
+                end
+            end
+        elseif type(key) == "table" then
+            for k,v in pairs(tbl) do
+                if occursin(k, key) then
+                    result[key] = func(v)
+                else
+                    result[k] = v
+                end
+            end
+        else
+            print("Unsupported key type")
+        end
+    end
+    return result
+end
+
 utils.using = using
 utils.read = read
 utils.split = split
@@ -509,6 +545,7 @@ utils.read_yaml = read_yaml
 utils.merge_sort = merge_sort
 utils.merge_sort_with_indices = merge_sort_with_indices
 utils.get_sorted_indices = get_sorted_indices
+utils.apply = apply
 
 -- Export the module
 return utils
