@@ -104,10 +104,10 @@ end
 
 -- Transposes a dataframe
 function transpose(data_table)
-    if not is_dataframe(data_table) then
-        print("Not a valid dataframe.")
-        return
-    end
+    -- if not is_dataframe(data_table) then
+    --     print("Not a valid dataframe.")
+    --     return
+    -- end
 
     local transposed_table = {}
 
@@ -175,18 +175,19 @@ local function sort_by(tbl, col)
     return sorted_table
 end
 
--- Function to sort a table based on input arguments
--- function sort(tbl, keys)
---     if type(keys) == "string" then
---         -- If keys is a string, perform single-key sort
---         sort_table_by_key(tbl, keys)
---     elseif type(keys) == "table" then
---         -- If keys is a table, perform multiple-key sort
---         sort_table_by_multiple_keys(tbl, keys)
---     else
---         print("Invalid keys argument")
---     end
--- end
+-- Function to select specific columns
+local function select(tbl, cols)
+    local result = {}
+    for _, row in pairs(tbl) do
+        local selected = {}
+        for _, col in pairs(cols) do
+            local value = row[col]
+            selected[col] = value
+        end
+        table.insert(result, selected)
+    end
+    return result
+end
 
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
@@ -195,6 +196,7 @@ dataframes.groupby = groupby
 dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
 dataframes.sort_by = sort_by
+dataframes.select = select
 
 -- Export the module
 return dataframes

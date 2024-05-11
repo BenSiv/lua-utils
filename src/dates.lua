@@ -35,8 +35,31 @@ function date_range(first_date, last_date, unit, interval)
     return full_date_range
 end
 
+function disect_date(input_date)
+    local year, month, day = input_date:match("(%d+)-(%d+)-(%d+)")
+    return year, month, day
+end
+
+function get_day(input_date)
+    local year, month, day = disect_date(input_date)
+    return day
+end
+
+function get_month(input_date)
+    local year, month, day = disect_date(input_date)
+    return month
+end
+
+function get_year(input_date)
+    local year, month, day = disect_date(input_date)
+    return year
+end
+
 dates.convert_date_format = convert_date_format
-dates.date_range = date_range
+dates.disect_date = disect_date
+dates.get_day = get_day
+dates.get_nonth = get_nonth
+dates.get_year = get_year
 
 -- Export the module
 return dates

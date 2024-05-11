@@ -1,0 +1,6 @@
+people: 5
+months: 12
+min_salary: 8000
+max_salary: 20000
+initial_balance: 1000
+initial_year: 2024

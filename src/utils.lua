@@ -269,17 +269,17 @@ function readdir(directory)
     return files
 end
 
-function insert(tbl, element)
-    if type(tbl) ~= "table" then
-        error("Input is not a table")
-    end
+-- function insert(tbl, element)
+--     if type(tbl) ~= "table" then
+--         error("Input is not a table")
+--     end
 
-    new_tbl = copy_table(tbl)
+--     new_tbl = copy_table(tbl)
 
-    table.insert(tbl, element)
+--     table.insert(tbl, element)
 
-    return new_tbl
-end
+--     return new_tbl
+-- end
 
 function keys(tbl)
     if type(tbl) ~= "table" then
@@ -327,16 +327,34 @@ end
 
 function read_yaml(file_path)
     local file = io.open(file_path, "r")
-    local data
     if not file then
-        error("Failed to read file: " .. file_path)
-    else
-        local content = file:read("*all")
-        data = yaml.load(content)
-        file:close()
+        return nil, "Failed to open file: " .. file_path
     end
+
+    local data = {}
+    for line in file:lines() do
+        local key, value = line:match("([^:]+):%s*(.+)")
+        if key and value then
+            data[key] = value
+        end
+    end
+
+    file:close()
     return data
 end
+
+-- function read_yaml(file_path)
+--     local file = io.open(file_path, "r")
+--     local data
+--     if not file then
+--         error("Failed to read file: " .. file_path)
+--     else
+--         local content = file:read("*all")
+--         data = yaml.load(content)
+--         file:close()
+--     end
+--     return data
+-- end
 
 
 -- Merge function to merge two sorted arrays
@@ -430,10 +448,11 @@ local function merge_with_indices(left, right)
 end
 
 -- Merge Sort function along with indices
-local function merge_sort_with_indices(array, inner)
+local function merge_sort_with_indices(array, _inner)
     local len_array = length(array)
 
-    if not inner then
+    -- _inner recursion boolean flag
+    if not _inner then
         for i = 1, len_array do
             array[i] =  {value = array[i], index = i}
         end
@@ -450,14 +469,10 @@ local function merge_sort_with_indices(array, inner)
     local right = {}
 
     for i = 1, middle do
-        -- left[i] = array[i]
-        -- table.insert(left, {value = array[i], index = i})
         table.insert(left, array[i])
     end
 
     for i = middle + 1, len_array do
-        -- right[i] = array[i]
-        -- table.insert(right, {value = array[i], index = i})
         table.insert(right, array[i])
 
     end
