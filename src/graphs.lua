@@ -3,45 +3,80 @@ require("utils").using("utils")
 -- Define a module table
 local graphs = {}
 
--- Translate node name to node index
-local function get_or_create_index(name)
-    if not name_to_index[name] then
-        name_to_index[name] = next_index
-        index_to_name[next_index] = name
-        next_index = next_index + 1
+-- switch keys and values
+local function reverse_kv(tbl)
+    local reversed = {}
+    for k, v in pairs(tbl) do
+       reversed[v] = k
     end
-    return name_to_index[name]
+    return reversed
 end
 
--- Function to perform depth first search from a specific node
-local function dfs(node_index, graph, visited)
-    if visited[node_index] then return end
-    visited[node_index] = true
-
-    if graph[node_index] then
-        for _, child_index in ipairs(graph[node_index]) do
-            dfs(child_index, graph, visited)
-        end
+-- Function to get or create an index for a given name
+local function get_or_create_index(name, node_map)
+    index_map = reverse_kv(node_map)
+    local node_index
+    if not index_map[name] then
+        node_index = length(node_map) + 1
+        node_map[node_index] = name
+    else
+        node_index = index_map[name]
     end
+    return node_index, node_map
+end
+
+-- Build the graph as an adjacency list while also returning a node-map {index = name}
+local function build_graph(data)
+    local graph = {}
+    local node_map = {}
+    local source_index
+    local name_index
+
+    for _, entry in ipairs(data) do
+        source_index, node_map = get_or_create_index(entry.source, node_map)
+        name_index, node_map = get_or_create_index(entry.name, node_map)
+
+        if not graph[source_index] then
+            graph[source_index] = {}
+        end
+        table.insert(graph[source_index], name_index)
+    end
+
+    return graph, node_map
 end
 
 -- Function to find all children of a specific node
-local function find_children(node_index, graph)
-    local children = {}
+local function get_all_children(graph, node_map, node_name)
     local visited = {}
-
-    dfs(node_index, graph, visited)
-
-    for index, visited_node in pairs(visited) do
-        if visited_node then
-            table.insert(children, index)
+    local children_indices = {}
+  
+    local function dfs(node)
+        visited[node] = true
+    
+        if graph[node] then
+            for i, neighbor in pairs(graph[node]) do
+                if not visited[neighbor] then
+                    children_indices[i] = neighbor
+                    dfs(neighbor)
+                end
+            end
         end
+    end
+  
+    local start_node = node_map[node_name]
+    dfs(start_node)
+    
+    local children = {}
+    for _, index in pairs(children_indices) do
+        children[index] = node_map[index]
     end
 
     return children
 end
 
-graphs.get_or_create_index = get_or_create_index
+
+graphs.build_graph = build_graph
+graphs.get_all_children = get_all_children
 
 -- Export the module
 return graphs

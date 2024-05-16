@@ -122,6 +122,14 @@ function transpose(data_table)
     return transposed_table
 end
 
+function array_to_df(array)
+    local df = {}
+    for idx, val in pairs(array) do
+        table.insert(df, {index = idx, value = val})
+    end
+    return df
+end
+
 -- Function to group data by a specified key
 function groupby(data, key)
     local groups = {}
