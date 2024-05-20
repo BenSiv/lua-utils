@@ -63,7 +63,7 @@ local function get_all_children(graph, node_map, node_name)
         end
     end
   
-    local start_node = node_map[node_name]
+    local start_node = get_or_create_index(node_name, node_map)
     dfs(start_node)
     
     local children = {}
@@ -74,9 +74,37 @@ local function get_all_children(graph, node_map, node_name)
     return children
 end
 
+-- Function to find all parents of a specific node
+local function get_all_parents(graph, node_map, node_name)
+    local visited = {}
+    local parents_indices = {}
+  
+    local function dfs(node)
+        visited[node] = true
+        local neighbor = node_map[node]
+        if neighbor then
+            if not visited[neighbor] then
+                parents_indices[neighbor] = node
+                dfs(neighbor)
+            end
+        end
+    end
+  
+    local target_node = get_or_create_index(node_name, node_map)
+    dfs(target_node)
+    
+    local parents = {}
+    for _, index in pairs(parents_indices) do
+        parents[index] = node_map[index]
+    end
+
+    return parents
+end
+
 
 graphs.build_graph = build_graph
 graphs.get_all_children = get_all_children
+graphs.get_all_parents = get_all_parents
 
 -- Export the module
 return graphs
