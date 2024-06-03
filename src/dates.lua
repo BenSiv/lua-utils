@@ -58,7 +58,7 @@ end
 dates.convert_date_format = convert_date_format
 dates.disect_date = disect_date
 dates.get_day = get_day
-dates.get_nonth = get_nonth
+dates.get_month = get_month
 dates.get_year = get_year
 
 -- Export the module
