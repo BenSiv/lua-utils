@@ -7,5 +7,11 @@ arg_string = [[
     -i --iterations arg number false
 ]]
 
-parsed_args = def_args(arg_string)
-print_help(parsed_args)
+expected_args = def_args(arg_string)
+-- print_help(expected_args)
+-- show(expected_args)
+
+-- arg = {"this_script.lua", "-d", "--output", "out_file.txt", "-i", "5"}
+
+parsed_args = parse_args(arg, expected_args)
+show(parsed_args)
