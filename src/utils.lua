@@ -117,6 +117,16 @@ function occursin(element, source)
     return answer
 end
 
+function unique(tbl)
+    result = {}
+    for _, element in pairs(tbl) do 
+        if not occursin(element, result) then
+            table.insert(result, element)
+        end
+    end
+    return result
+end
+
 -- Syntax sugar for match
 function match(what, where)
     return where:match(what)
@@ -589,6 +599,7 @@ utils.length = length
 utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
+utils.unique = unique
 utils.match = match
 utils.match_all = match_all
 utils.copy_table = copy_table
