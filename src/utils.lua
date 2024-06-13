@@ -215,18 +215,21 @@ function split(str, delimiter)
     local result = {}
     local token = ""
     local pos = 1
+    local delimiter_length = length(delimiter)
+    local str_length = length(str)
 
-    while pos <= length(str) do
-        local char = str:sub(pos, pos)
-        if char == delimiter then
+    while pos <= str_length do
+        -- Check if the substring from pos to pos + delimiter_length - 1 matches the delimiter
+        if str:sub(pos, pos + delimiter_length - 1) == delimiter then
             if token ~= "" then
                 table.insert(result, token)
                 token = ""
             end
+            pos = pos + delimiter_length
         else
-            token = token .. char
+            token = token .. str:sub(pos, pos)
+            pos = pos + 1
         end
-        pos = pos + 1
     end
 
     if token ~= "" then
