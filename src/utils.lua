@@ -177,6 +177,8 @@ end
 
 -- Returns new table with replaced value
 function replace_string(str, old, new)
+    -- Escape special characters in 'old' before using it in pattern
+    old = old:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
     local output_str = str:gsub(old, new)
     return output_str
 end
