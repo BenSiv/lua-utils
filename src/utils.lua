@@ -162,7 +162,7 @@ function copy(source)
 end
 
 -- Returns new table with replaced value
-function replace(tbl, old, new)
+function replace_table(tbl, old, new)
     local new_table = {}
     for key, value in pairs(tbl) do
         if type(value) == "table" then
@@ -174,6 +174,25 @@ function replace(tbl, old, new)
         end
     end
     return new_table
+end
+
+-- Returns new table with replaced value
+function replace_string(str, old, new)
+    local output_str = str:gsub(old, new)
+    return output_str
+end
+
+-- Returns new table with replaced value
+function replace(container, old, new)
+    if type(container) == "table" then
+        answer = replace_table(container, old, new)
+    elseif type(container) == "string" then
+        answer = replace_string(container, old, new)
+    else
+        print("unsupported type given")
+        return
+    end
+    return answer
 end
 
 -- Generic function to return the 0 value of type
