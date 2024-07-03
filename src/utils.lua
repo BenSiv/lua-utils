@@ -129,13 +129,12 @@ end
 
 -- Syntax sugar for match
 function match(what, where)
-    return where:match(what)
+    return string.match(where, what)
 end
 
 -- Syntax sugar for gmatch
 function match_all(what, where)
-    local answer = where:gmatch(what)
-    return answer
+    return string.gmatch(where, what)
 end
 
 -- Returns a copy of table
