@@ -4,13 +4,6 @@ using("dataframes")
 -- Define a module table
 local argparse = {}
 
--- example of arg_string
--- local arg_string = [[
---     -d --detach flag string false
---     -o --output arg string true
---     -i --iterations arg number false
--- ]]
-
 local function print_help(expected_args)
     print("Usage: ", arg[0])
     local help_df = {}
@@ -112,3 +105,14 @@ argparse.parse_args = parse_args
 
 -- Export the module
 return argparse
+
+
+-- example of arg_string
+-- local arg_string = [[
+--     -d --detach flag string false
+--     -o --output arg string true
+--     -i --iterations arg number false
+-- ]]
+
+-- local expected_args = def_args(arg_string)
+-- local args = parse_args(arg, expected_args)
