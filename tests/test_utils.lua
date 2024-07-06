@@ -18,3 +18,6 @@ local output_table = replace(input_table, old_value, new_value)
 
 unsorted_array = {5, 3, 8, 1, 2, 7, 4, 6}
 show(merge_sort_with_indices(unsorted_array))
+
+show(unique({"a","b","a","c"}))
+
