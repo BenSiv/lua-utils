@@ -358,36 +358,36 @@ function sleep(n)
     while clock() - t0 <= n do end
 end
 
-function read_yaml(file_path)
-    local file = io.open(file_path, "r")
-    if not file then
-        return nil, "Failed to open file: " .. file_path
-    end
-
-    local data = {}
-    for line in file:lines() do
-        local key, value = line:match("([^:]+):%s*(.+)")
-        if key and value then
-            data[key] = value
-        end
-    end
-
-    file:close()
-    return data
-end
-
 -- function read_yaml(file_path)
 --     local file = io.open(file_path, "r")
---     local data
 --     if not file then
---         error("Failed to read file: " .. file_path)
---     else
---         local content = file:read("*all")
---         data = yaml.load(content)
---         file:close()
+--         return nil, "Failed to open file: " .. file_path
 --     end
+
+--     local data = {}
+--     for line in file:lines() do
+--         local key, value = line:match("([^:]+):%s*(.+)")
+--         if key and value then
+--             data[key] = value
+--         end
+--     end
+
+--     file:close()
 --     return data
 -- end
+
+function read_yaml(file_path)
+    local file = io.open(file_path, "r")
+    local data
+    if not file then
+        error("Failed to read file: " .. file_path)
+    else
+        local content = file:read("*all")
+        data = yaml.load(content)
+        file:close()
+    end
+    return data
+end
 
 
 -- Merge function to merge two sorted arrays
