@@ -1,9 +1,6 @@
 -- Define a module table
 local utils = {}
 
-package.path = "../lua-yaml" .. "?.lua;" .. package.path
-package.path = "../luafilesystem/src" .. "?.lua;" .. package.path
-
 local lfs = require("lfs")
 local yaml = require("yaml")
 
