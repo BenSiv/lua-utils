@@ -1,0 +1,3 @@
+[submodule "lua-yaml"]
+	path = lua-yaml
+	url = https://github.com/acd/lua-yaml.git
