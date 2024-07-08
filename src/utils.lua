@@ -128,12 +128,12 @@ function unique(tbl)
 end
 
 -- Syntax sugar for match
-function match(what, where)
+function match(where, what)
     return string.match(where, what)
 end
 
 -- Syntax sugar for gmatch
-function match_all(what, where)
+function match_all(where, what)
     return string.gmatch(where, what)
 end
 
@@ -336,20 +336,6 @@ function values(tbl)
         table.insert(values, value)
     end
     return values
-end
-
--- function script_path()
---     local str = debug.getinfo(1, "S").source:sub(2)
---     return str:match("(.*/)")
--- end
-
-function dirname(path)
-    local last_sep = path:match(".*/")
-    if last_sep then
-        return slice(path, 1, length(last_sep))
-    else
-        return path
-    end
 end
 
 function sleep(n)
@@ -632,8 +618,6 @@ utils.readdir = readdir
 utils.insert = insert
 utils.keys = keys
 utils.values = values
--- utils.script_path = script_path
-utils.dirname = dirname
 utils.sleep = sleep
 utils.read_yaml = read_yaml
 utils.sort = merge_sort
