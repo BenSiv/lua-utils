@@ -25,6 +25,17 @@ function read(path)
     return content
 end
 
+-- Read file content
+function write(path, content)
+    local file = io.open(path, "w")
+    if file then
+        content = file:write(content)
+        file:close()
+    else
+        print("Failed to open " .. path)
+    end
+end
+
 -- Repeats a string n times into a new concatenated string
 local function repeat_string(str, n)
     local result = ""
