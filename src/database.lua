@@ -29,7 +29,7 @@ local function local_update(db_path, statement)
     end
 
     local _, err = db:exec(statement)
-    if not err then
+    if err then
         print("Error: " .. err)
     end
 
