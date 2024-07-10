@@ -2,12 +2,20 @@
 local user = {}
 
 function input(prompt)
+    if not prompt then
+        print("Prompt the user for responce!")
+        return
+    end
     io.write(prompt)
     local answer = io.read()
     return answer
 end
 
 function inputs(prompt)
+    if not prompt then
+        print("Prompt the user for responce!")
+        return
+    end
     io.write(prompt)
     local full_answer = {}
     local answer = ""
