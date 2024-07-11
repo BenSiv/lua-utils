@@ -22,15 +22,15 @@ end
 local function joinpath(...)
     local parts = {...}
     local separator = package.config:sub(1,1)
-    
+
     local joined_path = table.concat(parts, separator)
-    
+
     if separator == '\\' then
         joined_path = joined_path:gsub('[\\/]+', '\\')
     else
         joined_path = joined_path:gsub('[\\/]+', '/')
     end
-    
+
     return joined_path
 end
 
