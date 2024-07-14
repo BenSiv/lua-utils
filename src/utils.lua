@@ -380,7 +380,7 @@ function read_yaml(file_path)
         error("Failed to read file: " .. file_path)
     else
         local content = file:read("*all")
-        data = yaml.load(content)
+        data = yaml.eval(content)
         file:close()
     end
     return data
