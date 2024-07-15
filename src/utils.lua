@@ -138,6 +138,19 @@ function unique(tbl)
     return result
 end
 
+
+function isempty(source)
+    local answer = false
+    if type(source) == "table" or type(source) == "string" then
+        if length(source) == 0 then
+            answer = true
+        end
+    else
+        print("Error: not a containable type")
+    end
+    return answer
+end
+
 -- Syntax sugar for match
 function match(where, what)
     return string.match(where, what)
