@@ -138,6 +138,18 @@ function unique(tbl)
     return result
 end
 
+function isempty(source)
+    local answer = false
+    if source or type(source) == "table" or type(source) == "string" then
+        if length(source) == 0 then
+            answer = true
+        end
+    else
+        print("Error: got a non containable type")
+    end
+    return answer
+end
+
 -- Syntax sugar for match
 function match(where, what)
     return string.match(where, what)
@@ -617,6 +629,7 @@ utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
 utils.unique = unique
+utils.isempty = isempty
 utils.match = match
 utils.match_all = match_all
 utils.copy_table = copy_table
