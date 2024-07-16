@@ -140,7 +140,7 @@ end
 
 function isempty(source)
     local answer = false
-    if source or type(source) == "table" or type(source) == "string" then
+    if source and (type(source) == "table" or type(source) == "string") then
         if length(source) == 0 then
             answer = true
         end
