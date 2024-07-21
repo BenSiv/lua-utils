@@ -70,8 +70,11 @@ end
 
 -- Pretty print a dataframe
 function view(data_table)
-    if not is_dataframe(data_table) then
-        print("Not a valid dataframe.")
+    if isempty(data_table) then
+        print("Empty table")
+        return
+    elseif not is_dataframe(data_table) then
+        print("Not a valid dataframe")
         return
     end
 

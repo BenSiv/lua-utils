@@ -11,6 +11,7 @@ local function local_query(db_path, query)
         return nil
     end
 
+    query = unescape_string(query)
     local result_rows = {}
     for row in db:rows(query) do
         table.insert(result_rows, row)
@@ -27,7 +28,8 @@ local function local_update(db_path, statement)
         print("Error opening database")
         return nil
     end
-
+    
+    statement = unescape_string(statement)
     local _, err = db:exec(statement)
     if err then
         print("Error: " .. err)
