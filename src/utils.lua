@@ -205,6 +205,11 @@ function escape_string(str)
     return new_str
 end
 
+function unescape_string(str)
+    local new_str = str:gsub("%%([%[%]%(%)%.%+%-%*%%])", "%1")
+    return new_str
+end
+
 -- Returns new table with replaced value
 function replace_string(str, old, new)
     old = escape_string(old)
@@ -626,6 +631,7 @@ end
 
 utils.using = using
 utils.escape_string = escape_string
+utils.unescape_string = unescape_string
 utils.read = read
 utils.split = split
 utils.repeat_string = repeat_string
