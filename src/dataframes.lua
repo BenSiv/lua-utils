@@ -197,6 +197,23 @@ local function select(tbl, cols)
     return result
 end
 
+-- Function to select specific columns
+local function diff(tbl, col)
+    local result = {}
+    local last_value = 0
+    local value = 0
+    for index, row in pairs(tbl) do
+        if index == 1 then 
+            -- do not update values
+        else
+            value = row[col] - last_value
+        end
+        last_value = row[col]
+        table.insert(result, value)
+    end
+    return result
+end
+
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
 dataframes.transpose = transpose
@@ -205,6 +222,7 @@ dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
 dataframes.sort_by = sort_by
 dataframes.select = select
+dataframes.diff = diff
 
 -- Export the module
 return dataframes
