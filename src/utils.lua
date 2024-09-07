@@ -18,6 +18,7 @@ function read(path)
     local content = nil
     if file then
         content = file:read("*all")
+        content = escape_string(content)
         file:close()
     else
         print("Failed to open " .. path)
@@ -138,15 +139,14 @@ function unique(tbl)
     return result
 end
 
-
 function isempty(source)
     local answer = false
-    if type(source) == "table" or type(source) == "string" then
+    if source and (type(source) == "table" or type(source) == "string") then
         if length(source) == 0 then
             answer = true
         end
     else
-        print("Error: not a containable type")
+        print("Error: got a non containable type")
     end
     return answer
 end
@@ -199,10 +199,20 @@ function replace_table(tbl, old, new)
     return new_table
 end
 
+-- Escape special characters string
+function escape_string(str)
+    local new_str = str:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
+    return new_str
+end
+
+function unescape_string(str)
+    local new_str = str:gsub("%%([%[%]%(%)%.%+%-%*%%])", "%1")
+    return new_str
+end
+
 -- Returns new table with replaced value
 function replace_string(str, old, new)
-    -- Escape special characters in 'old' before using it in pattern
-    old = old:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
+    old = escape_string(old)
     local output_str = str:gsub(old, new)
     return output_str
 end
@@ -621,6 +631,8 @@ function load_table(filename)
 end
 
 utils.using = using
+utils.escape_string = escape_string
+utils.unescape_string = unescape_string
 utils.read = read
 utils.split = split
 utils.repeat_string = repeat_string
@@ -631,6 +643,7 @@ utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
 utils.unique = unique
+utils.isempty = isempty
 utils.match = match
 utils.match_all = match_all
 utils.copy_table = copy_table
