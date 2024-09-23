@@ -10,7 +10,7 @@ function input(prompt)
     end
     io.write(prompt)
     local answer = io.read()
-    answer = escape_string(answer)
+    -- answer = escape_string(answer)
     return answer
 end
 
@@ -24,7 +24,7 @@ function inputs(prompt)
     local answer = ""
     while true do
         answer = io.read()
-        answer = escape_string(answer)
+        -- answer = escape_string(answer)
         if answer == "" then
             break
         end
