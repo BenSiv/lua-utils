@@ -93,40 +93,54 @@ function round(value, decimal)
     return math.floor(value * factor + 0.5) / factor
 end
 
--- Checks if element in table
-local function in_table(element, some_table)
-    local answer = false
-    for _, value in pairs(some_table) do
-        if value == element then
-            answer = true
+-- Helper function to compare two tables for deep equality
+local function deep_equal(t1, t2)
+    if t1 == t2 then return true end  -- Same reference
+    if type(t1) ~= "table" or type(t2) ~= "table" then return false end
+
+    for key, value in pairs(t1) do
+        if type(value) == "table" and type(t2[key]) == "table" then
+            if not deep_equal(value, t2[key]) then return false end
+        elseif value ~= t2[key] then
+            return false
         end
     end
-    return answer
+
+    -- Check if `t2` has extra keys not present in `t1`
+    for key in pairs(t2) do
+        if t1[key] == nil then return false end
+    end
+
+    return true
 end
 
--- Checks if substring in string
+-- Checks if an element is present in a table (supports deep comparison)
+local function in_table(element, some_table)
+    for _, value in pairs(some_table) do
+        if type(element) == "table" and type(value) == "table" then
+            if deep_equal(element, value) then return true end
+        elseif value == element then
+            return true
+        end
+    end
+    return false
+end
+
+-- Checks if a substring is present in a string
 local function in_string(element, some_string)
-    local answer = false
-    if string.find(some_string, element) then
-        answer = true
-    else
-        answer = false
-    end
-    return answer
+    return string.find(some_string, element) ~= nil
 end
 
--- Generic function to check if element in composable type
+-- Generic function to check if an element is present in a composable type
 function occursin(element, source)
-    local answer = false
     if type(source) == "table" then
-        answer = in_table(element, source)
+        return in_table(element, source)
     elseif type(source) == "string" then
-        answer = in_string(element, source)
+        return in_string(element, source)
     else
-        print("unsupported type given")
-        return
+        print("Unsupported type given")
+        return false
     end
-    return answer
 end
 
 function unique(tbl)
