@@ -26,7 +26,7 @@ function read(path)
     return content
 end
 
--- Read file content
+-- write file content
 function write(path, content)
     local file = io.open(path, "w")
     if file then
@@ -417,8 +417,8 @@ function read_yaml(file_path)
         error("Failed to read file: " .. file_path)
     else
         local content = file:read("*all")
-        -- data = yaml.load(content)
-        data = yaml.eval(content)
+        data = yaml.load(content)
+        -- data = yaml.eval(content)
         file:close()
     end
     return data
@@ -642,6 +642,22 @@ function load_table(filename)
         print("Error loading file: " .. err)
         return nil
     end
+end
+
+function is_array(tbl)
+    if type(tbl) ~= "table" then
+        return false
+    end
+
+    local idx = 0
+    for _ in pairs(tbl) do
+        idx = idx + 1
+        if tbl[idx] == nil then
+            return false
+        end
+    end
+
+    return true
 end
 
 utils.using = using
