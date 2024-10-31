@@ -424,7 +424,6 @@ function read_yaml(file_path)
     return data
 end
 
-
 -- Merge function to merge two sorted arrays
 local function merge(left, right)
     local result = {}
@@ -563,6 +562,19 @@ local function get_sorted_indices(array)
     return indices
 end
 
+-- Function to sort a table's values (and sub-tables recursively)
+local function deep_sort(tbl)
+	local sorted = merge_sort(tbl)
+
+    for key, value in pairs(sorted) do
+        if type(value) == "table" then
+            sorted[key] = deep_sort(value)
+        end
+    end
+
+    return sorted
+end
+
 local function apply(func, tbl, level, key, _current_level)
     _current_level = _current_level or 0
     level = level or 0
@@ -691,6 +703,7 @@ utils.read_yaml = read_yaml
 utils.sort = merge_sort
 utils.sort_with_indices = merge_sort_with_indices
 utils.get_sorted_indices = get_sorted_indices
+utils.deep_sort = deep_sort
 utils.apply = apply
 utils.save_table = save_table
 utils.load_table = load_table
