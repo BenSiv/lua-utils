@@ -4,8 +4,8 @@ using("dataframes")
 -- Define a module table
 local argparse = {}
 
-local function print_help(expected_args)
-    print("Usage: ", arg[0])
+local function print_help(cmd_args, expected_args)
+    print("Usage: ", cmd_args[0])
     local help_df = {}
     for _, arg_parsed in pairs(expected_args) do
         local row = {
@@ -38,15 +38,20 @@ end
 
 local function def_args(arg_string)
     local expected_args = {}
-    for line in arg_string:gmatch("[^\r\n]+") do
-        local short, long, arg_kind, arg_type, is_required = line:match("%s*%-(%a)%s+%-%-([%a_]+)%s+(%a+)%s+(%a+)%s+(%a+)%s*")
-        is_required = is_required == "true"
-        expected_args = add_arg(expected_args, short, long, arg_kind, arg_type, is_required)
+    local short, long, arg_kind, arg_type, is_required
+    for line in match_all(arg_string, "[^\r\n]+") do
+    	if not match(line, "^$s*$") then
+        	short, long, arg_kind, arg_type, is_required = match(line, "%s*%-(%a)%s+%-%-([%a_]+)%s+(%a+)%s+(%a+)%s+(%a+)%s*")
+        	is_required = is_required == "true"
+        	if short and long and arg_kind and arg_type then
+        		expected_args = add_arg(expected_args, short, long, arg_kind, arg_type, is_required)
+        	end
+        end
     end
     return expected_args
 end
 
-local function parse_args(arg, expected_args)
+local function parse_args(cmd_args, expected_args)
     local result = {}
     local arg_map = {}
 
@@ -57,13 +62,13 @@ local function parse_args(arg, expected_args)
     end
 
     local i = 1
-    while i <= length(arg) do
-        local arg_name = arg[i]
+    while i <= length(cmd_args) do
+        local arg_name = cmd_args[i]
         local parsed_arg = arg_map[arg_name]
 
         if not parsed_arg then
             print("Unknown argument: " .. arg_name)
-            print_help(expected_args)
+            print_help(cmd_args, expected_args)
             return nil
         end
 
@@ -71,15 +76,15 @@ local function parse_args(arg, expected_args)
             result[parsed_arg.long] = true
         elseif parsed_arg.arg_kind == "arg" then
             i = i + 1
-            if i > length(arg) then
+            if i > length(cmd_args) then
                 print("Expected value after " .. arg_name)
-                print_help(expected_args)
+                print_help(cmd_args, expected_args)
                 return nil
             end
             if parsed_arg.arg_type == "number" then
-                result[parsed_arg.long] = tonumber(arg[i])
+                result[parsed_arg.long] = tonumber(cmd_args[i])
             else
-                result[parsed_arg.long] = arg[i]
+                result[parsed_arg.long] = cmd_args[i]
             end
         end
 
