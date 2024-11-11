@@ -1,6 +1,6 @@
 require("utils").using("utils")
+using("delimited_files")
 local sqlite = require("sqlite3")
-local readdlm = require("delimited_files").readdlm
 
 -- Define a module table
 local database = {}
@@ -66,9 +66,20 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
     db:close()
 end
 
+local function export_delimited(db_path, query, file_path, delimiter, header)
+    local results = local_query(db_path, query)
+    if not results or length(results) == 0 then
+        print("No data to export.")
+        return
+    end
+
+    writedlm(file_path, delimiter, results, header)
+end
+
 database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
+database.export_delimited = export_delimited
 
 -- Export the module
 return database
