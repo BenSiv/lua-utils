@@ -41,6 +41,16 @@ local function add_to_path(script_path, relative_path)
     package.path = path_to_add .. package.path
 end
 
+local funciton file_exists(path)
+	local answer = false
+	local file = io.open(path, "r")
+	if file then
+		answer = true
+	end
+	file:close()
+	return answer
+end
+
 local function create_dir_if_not_exists(path)
 	local dir_path = joinpath(path)
 	-- Check if the directory exists
@@ -57,12 +67,11 @@ local function create_dir_if_not_exists(path)
 end
 
 local function create_file_if_not_exists(path)
-	local file_path = joinpath(path)
 	-- Check if the file exists
-	local file = io.open(file_path, "r")
+	local file = io.open(path, "r")
 	if not file then
 	    -- File does not exist; create it
-	    file, err = io.open(file_path, "w")
+	    file, err = io.open(path, "w")
 	    if not file then
 	        print("Error creating file:", err)
 	        return
