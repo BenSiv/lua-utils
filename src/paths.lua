@@ -41,7 +41,7 @@ local function add_to_path(script_path, relative_path)
     package.path = path_to_add .. package.path
 end
 
-local funciton file_exists(path)
+local function file_exists(path)
 	local answer = false
 	local file = io.open(path, "r")
 	if file then
