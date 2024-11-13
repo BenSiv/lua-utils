@@ -46,8 +46,8 @@ local function file_exists(path)
 	local file = io.open(path, "r")
 	if file then
 		answer = true
+		file:close()
 	end
-	file:close()
 	return answer
 end
 
