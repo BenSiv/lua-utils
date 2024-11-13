@@ -87,6 +87,7 @@ paths.get_script_path = get_script_path
 paths.get_script_dir = get_script_dir
 paths.joinpath = joinpath
 paths.add_to_path = add_to_path
+paths.file_exists = file_exists
 paths.create_dir_if_not_exists = create_dir_if_not_exists
 paths.create_file_if_not_exists = create_file_if_not_exists
 
