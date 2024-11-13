@@ -41,11 +41,45 @@ local function add_to_path(script_path, relative_path)
     package.path = path_to_add .. package.path
 end
 
+local function create_dir_if_not_exists(path)
+	local dir_path = joinpath(path)
+	-- Check if the directory exists
+	local attr = lfs.attributes(path)
+	if not attr then
+	    -- Directory does not exist; create it
+	    local success, err = lfs.mkdir(path)
+	    if not success then
+	        print("Error creating directory:", err)
+	        return 
+	    end
+	end
+	return true
+end
+
+local function create_file_if_not_exists(path)
+	local file_path = joinpath(path)
+	-- Check if the file exists
+	local file = io.open(file_path, "r")
+	if not file then
+	    -- File does not exist; create it
+	    file, err = io.open(file_path, "w")
+	    if not file then
+	        print("Error creating file:", err)
+	        return
+	    else
+	        file:close()  -- Close the file after creating it
+	    end
+	end
+	return true
+end
+
 paths.get_parent_dir = get_parent_dir
 paths.get_script_path = get_script_path
 paths.get_script_dir = get_script_dir
 paths.joinpath = joinpath
 paths.add_to_path = add_to_path
+paths.create_dir_if_not_exists = create_dir_if_not_exists
+paths.create_file_if_not_exists = create_file_if_not_exists
 
 -- Export the module
 return paths
