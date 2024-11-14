@@ -37,6 +37,7 @@ local function local_update(db_path, statement)
     end
 
     db:close()
+    return true
 end
 
 local function import_delimited(db_path, file_path, table_name, delimiter)    
@@ -68,16 +69,24 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
     end
 
     db:close()
+    return true
 end
 
 local function export_delimited(db_path, query, file_path, delimiter, header)
     local results = local_query(db_path, query)
-    if not results or length(results) == 0 then
-        print("No data to export.")
-        return
+
+    if not results then
+    	print("Failed query")
+    	return nil
+    end
+    
+   	if length(results) == 0 then
+        print("No data found")
+        return nil
     end
 
     writedlm(file_path, delimiter, results, header)
+    return true
 end
 
 database.local_query = local_query
