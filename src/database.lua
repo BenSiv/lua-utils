@@ -47,6 +47,10 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
     end
 
     local content = readdlm(file_path, delimiter, true)
+    if not content then
+        return
+    end
+    
     local col_names = keys(content[1])
     local col_row = table.concat(col_names, "', '")
     local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
