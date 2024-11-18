@@ -40,6 +40,20 @@ local function local_update(db_path, statement)
     return true
 end
 
+local function get_sql_values(row, col_names)
+	local value
+	local sql_values = {}
+	for _, col in pairs(col_names) do
+		value = row[col]
+		if value ~= "" then
+			table.insert(sql_values, string.format("'%s'", value))
+		else
+			table.insert(sql_values, "NULL")
+		end
+	end
+	return sql_values
+end
+
 local function import_delimited(db_path, file_path, table_name, delimiter)    
     local db = sqlite.open(db_path)
     if not db then
@@ -52,13 +66,16 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
         return
     end
     
-    local col_names = keys(content[1])
+    local col_names = keys(content[1]) -- problematic if first row does not have all the columns
     local col_row = table.concat(col_names, "', '")
     local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
-    value_rows = {}
-    local row_values
+
+    local value_rows = {}
+    local sql_values = {}
+    local row_values = ""
     for _, row in pairs(content) do
-        row_values = string.format("('%s')", table.concat(values(row), "', '"))
+    	sql_values = get_sql_values(row, col_names)
+        row_values = string.format("(%s)", table.concat(sql_values, ", "))
         table.insert(value_rows, row_values)
     end
     insert_statement = insert_statement .. table.concat(value_rows, ", ") .. ";"
