@@ -2,24 +2,27 @@ time	overdue	due_to	done	task	id
 2024-11-18 05:38:30	0	2024-11-20 00:00:00	2024-11-18 06:12:35	changing task done from bool to date	67039542
 2024-11-11 14:27:15	0	2024-11-12 00:00:00	2024-11-12 00:00:00	back up tasks on change	119110395
 2024-10-15 04:57:27	0	2024-10-16 00:00:00	2024-10-16 00:00:00	updating Radis info about growth state	135895986
-2024-11-14 06:35:41	0	2024-11-20 00:00:00	 getting decision about the workflow module in benchling	142840662
+2024-11-14 06:35:41	0	2024-11-20 00:00:00	2024-11-19 07:09:24	getting decision about the workflow module in benchling	142840662
 2024-11-11 08:02:07	0	2024-11-15 00:00:00	2024-11-15 00:00:00	gettinig quota from Zebra for barcode scanner and label printer	174388789
 2024-10-15 05:35:45	0	2024-10-19 00:00:00	2024-10-19 00:00:00	modelling erlenmeyer holder	192292623
-2024-10-15 04:49:12	0	2024-11-20 00:00:00		automatic periodic summarization of notes using ollama	241291146
+2024-10-15 04:49:12	0	2024-11-20 00:00:00	automatic periodic summarization of notes using ollama	241291146
 2024-10-15 04:57:54	0	2024-10-18 00:00:00	2024-10-18 00:00:00	modelling erlenmeyer	313767630
-2024-11-11 08:05:27	0	2024-11-20 00:00:00		buying external GPU for LLM trainning	353152014
+2024-11-11 08:05:27	0	2024-11-20 00:00:00	buying external GPU for LLM trainning	353152014
 2024-11-12 13:15:01	0	2024-11-15 00:00:00	2024-11-15 00:00:00	changing brain-ex config location to ~/.config/brain-ex/config.yaml	406649982
-2024-10-15 04:56:25	0	2024-11-20 00:00:00		dealing with single quote mark in notes	418005304
-2024-10-15 04:50:14	0	2024-11-20 00:00:00		automatic linking on notes in brain-ex	461223538
+2024-10-15 04:56:25	0	2024-11-20 00:00:00	2024-11-19 07:19:54	dealing with single quote mark in notes	418005304
+2024-10-15 04:50:14	0	2024-11-20 00:00:00	automatic linking on notes in brain-ex	461223538
 2024-11-11 08:55:55	0	2024-11-15 00:00:00	2024-11-15 00:00:00	backup and rebuild tasks in brex update	526279261
+2024-11-19 13:38:22	0	2024-11-20 00:00:00	adding visability to sql command status	541841695
+2024-11-19 11:30:05	0	2024-11-20 00:00:00	generating ai video of our vision	596209875
 2024-11-11 14:31:08	0	2024-11-20 00:00:00	2024-11-20 00:00:00	integrate last notes into the cli	619137321
 2024-11-11 09:46:34	0	2024-11-15 00:00:00	2024-11-15 00:00:00	update culture room temps	639475553
-2024-10-15 04:49:55	0	2024-11-20 00:00:00		free text to schema app for lab data entry interface to benchling	651891288
-2024-10-15 04:51:09	0	2024-11-20 00:00:00		replacing empty lists to null in database	669792167
+2024-10-15 04:49:55	0	2024-11-20 00:00:00	free text to schema app for lab data entry interface to benchling	651891288
+2024-10-15 04:51:09	0	2024-11-20 00:00:00	replacing empty lists to null in database	669792167
 2024-10-15 04:57:09	0	2024-10-16 00:00:00	2024-10-16 00:00:00	list of GEN AI applications in use	685028871
 2024-11-18 05:41:04	0	2024-11-20 00:00:00	2024-11-20 00:00:00	adding user prompt for last notes	758338611
-2024-11-14 06:35:08	0	2024-11-20 00:00:00		buying a barcode scanner and label printer	811362847
-2024-11-17 08:38:07	0	2024-11-20 00:00:00		printing 1l erlenmeyer holder	822522512
+2024-11-14 06:35:08	0	2024-11-20 00:00:00	buying a barcode scanner and label printer	811362847
+2024-11-17 08:38:07	0	2024-11-20 00:00:00	printing 1l erlenmeyer holder	822522512
 2024-10-27 09:33:21	0	2024-10-30 00:00:00	2024-10-30 00:00:00	contacting Tel-Hai for 2L glass bio-reactor	844021705
 2024-11-17 08:39:52	0	2024-11-17 14:30:00	2024-11-17 14:30:00	onboarding yaniv on information flow	945810721
+2024-11-19 13:39:05	0	2024-11-20 00:00:00	fixing export of delimited files with missing values	955497777
 2024-11-17 08:44:20	0	2024-11-18 00:00:00	2024-11-18 00:00:00	configuring domain certification on aws for celleste-pedia	997711582

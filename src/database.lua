@@ -14,13 +14,33 @@ local function local_query(db_path, query)
 
     query = unescape_string(query)
     local result_rows = {}
+    local column_names = {}
+
     for row in db:rows(query) do
         table.insert(result_rows, row)
+        for col_name, _ in pairs(row) do
+            column_names[col_name] = true
+        end
     end
 
     db:close()
+
+    local all_columns = {}
+    for col_name, _ in pairs(column_names) do
+        table.insert(all_columns, col_name)
+    end
+
+    for _, row in ipairs(result_rows) do
+        for _, col_name in ipairs(all_columns) do
+            if row[col_name] == nil then
+                row[col_name] = ""
+            end
+        end
+    end
+
     return result_rows
 end
+
 
 local function local_update(db_path, statement)
     local db = sqlite.open(db_path)
@@ -45,7 +65,7 @@ local function get_sql_values(row, col_names)
 	local sql_values = {}
 	for _, col in pairs(col_names) do
 		value = row[col]
-		if value ~= "" then
+		if value and value ~= "" then
 			table.insert(sql_values, string.format("'%s'", value))
 		else
 			table.insert(sql_values, "NULL")
