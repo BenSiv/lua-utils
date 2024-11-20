@@ -13,10 +13,17 @@ local function local_query(db_path, query)
     end
 
     query = unescape_string(query)
+    local stmt, err = db:prepare(query)
+    if not stmt then
+        db:close()
+        print("Invalid query: " .. err)
+        return nil, "Invalid query: " .. err
+    end
+
     local result_rows = {}
     local column_names = {}
 
-    for row in db:rows(query) do
+    for row in stmt:rows() do
         table.insert(result_rows, row)
         for col_name, _ in pairs(row) do
             column_names[col_name] = true
@@ -45,7 +52,6 @@ local function local_query(db_path, query)
 
     return result_rows
 end
-
 
 local function local_update(db_path, statement)
     local db = sqlite.open(db_path)
