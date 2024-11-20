@@ -25,6 +25,11 @@ local function local_query(db_path, query)
 
     db:close()
 
+    if length(result_rows) == 0 then
+        print("Query executed successfully, but no rows were returned.")
+        return nil
+    end
+
     local all_columns = {}
     for col_name, _ in pairs(column_names) do
         table.insert(all_columns, col_name)
@@ -54,6 +59,7 @@ local function local_update(db_path, statement)
     local _, err = db:exec(statement)
     if err then
         print("Error: " .. err)
+        return nil
     end
 
     db:close()
@@ -83,7 +89,8 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
 
     local content = readdlm(file_path, delimiter, true)
     if not content then
-        return
+        print("Error reading delimited file")
+        return nil
     end
     
     local col_names = keys(content[1]) -- problematic if first row does not have all the columns
@@ -91,11 +98,9 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
     local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
 
     local value_rows = {}
-    local sql_values = {}
-    local row_values = ""
     for _, row in pairs(content) do
-    	sql_values = get_sql_values(row, col_names)
-        row_values = string.format("(%s)", table.concat(sql_values, ", "))
+    	local sql_values = get_sql_values(row, col_names)
+        local row_values = string.format("(%s)", table.concat(sql_values, ", "))
         table.insert(value_rows, row_values)
     end
     insert_statement = insert_statement .. table.concat(value_rows, ", ") .. ";"
@@ -103,6 +108,7 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
     local _, err = db:exec(insert_statement)
     if err then
         print("Error: " .. err)
+        return nil
     end
 
     db:close()
