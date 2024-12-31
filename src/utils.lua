@@ -672,6 +672,17 @@ function is_array(tbl)
     return true
 end
 
+-- Get the terminal line length
+function get_line_length()
+    local handle = io.popen("stty size 2>/dev/null | awk '{print $2}'")
+    if handle then
+        local result = handle:read("*a")
+        handle:close()
+        return tonumber(result) or 80 -- Default to 80 if unable to fetch
+    end
+    return 80 -- Fallback to default width
+end
+
 utils.using = using
 utils.escape_string = escape_string
 utils.unescape_string = unescape_string
@@ -707,6 +718,7 @@ utils.deep_sort = deep_sort
 utils.apply = apply
 utils.save_table = save_table
 utils.load_table = load_table
+utils.get_line_length = get_line_length
 
 -- Export the module
 return utils

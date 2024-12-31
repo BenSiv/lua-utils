@@ -68,43 +68,6 @@ function string_keys(obj)
     return new_table
 end
 
--- Pretty print a dataframe
-function view(data_table)
-    if isempty(data_table) then
-        print("Empty table")
-        return
-    elseif not is_dataframe(data_table) then
-        print("Not a valid dataframe")
-        return
-    end
-
-    -- Find the maximum width of each column
-    local column_widths = {}
-    for _, row in ipairs(data_table) do
-        for key, value in pairs(row) do
-            local width = length(tostring(value))
-            if not column_widths[key] or width > column_widths[key] then
-                column_widths[key] = width
-            end
-        end
-    end
-
-    -- Print the header
-    for key, col_width in pairs(column_widths) do
-        io.write("\27[1m" .. string.format("%-" .. col_width .. "s", key) .. "\27[0m\t")
-    end
-    io.write("\n")
-
-    -- Print the data
-    for _, row in ipairs(data_table) do
-        for key, col_width in pairs(column_widths) do
-            local value = tostring(row[key]) or ""
-            io.write(string.format("%-" .. col_width .. "s", value) .. "\t")
-        end
-        io.write("\n")
-    end
-end
-
 -- Transposes a dataframe
 function transpose(data_table)
     -- if not is_dataframe(data_table) then
@@ -123,6 +86,62 @@ function transpose(data_table)
     end
 
     return transposed_table
+end
+
+-- Pretty print a dataframe
+function view(data_table)
+    if isempty(data_table) then
+        print("Empty table")
+        return
+    elseif not is_dataframe(data_table) then
+        print("Not a valid dataframe")
+        return
+    end
+
+    -- Get terminal line length
+    local line_length = get_line_length()
+
+    -- Calculate column widths
+    local column_widths = {}
+    for _, row in pairs(data_table) do
+        for col_name, col_value in pairs(row) do
+            local col_width = #tostring(col_name)
+            local val_width = #tostring(col_value)
+            column_widths[col_name] = math.max(column_widths[col_name] or 0, col_width, val_width)
+        end
+    end
+
+    -- Adjust column widths to fit within terminal line length
+    local total_width = 0
+    for _, width in pairs(column_widths) do
+        total_width = total_width + width + 1 -- Add 1 for spacing
+    end
+
+    if total_width > line_length then
+        local scale_factor = line_length / total_width
+        for col_name, width in pairs(column_widths) do
+            column_widths[col_name] = math.floor(width * scale_factor)
+        end
+    end
+
+    -- Print column headers in bold
+    for key, col_width in pairs(column_widths) do
+        io.write("\27[1m")
+        local padded_key = tostring(key)
+        padded_key = padded_key .. string.rep(" ", col_width - #padded_key)
+        io.write(padded_key .. "\27[0m\t")
+    end
+    io.write("\n")
+
+    -- Print rows
+    for _, row in pairs(data_table) do
+        for col_name, col_width in pairs(column_widths) do
+            local value = tostring(row[col_name] or "")
+            value = value .. string.rep(" ", col_width - #value)
+            io.write(value .. "\t")
+        end
+        io.write("\n")
+    end
 end
 
 function array_to_df(array)
