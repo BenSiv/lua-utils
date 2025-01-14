@@ -105,8 +105,8 @@ function view(data_table)
     local column_widths = {}
     for _, row in pairs(data_table) do
         for col_name, col_value in pairs(row) do
-            local col_width = #tostring(col_name)
-            local val_width = #tostring(col_value)
+            local col_width = length(tostring(col_name))
+            local val_width = length(tostring(col_value))
             column_widths[col_name] = math.max(column_widths[col_name] or 0, col_width, val_width)
         end
     end
@@ -117,10 +117,12 @@ function view(data_table)
         total_width = total_width + width + 1 -- Add 1 for spacing
     end
 
+    -- Constrain total width to line length
     if total_width > line_length then
-        local scale_factor = line_length / total_width
-        for col_name, width in pairs(column_widths) do
-            column_widths[col_name] = math.floor(width * scale_factor)
+        local available_width = line_length - length(column_widths) -- Subtract space for separators
+        local width_per_column = math.floor(available_width / length(column_widths))
+        for col_name, _ in pairs(column_widths) do
+            column_widths[col_name] = math.min(column_widths[col_name], width_per_column)
         end
     end
 
@@ -128,7 +130,7 @@ function view(data_table)
     for key, col_width in pairs(column_widths) do
         io.write("\27[1m")
         local padded_key = tostring(key)
-        padded_key = padded_key .. string.rep(" ", col_width - #padded_key)
+        padded_key = padded_key .. string.rep(" ", col_width - length(padded_key))
         io.write(padded_key .. "\27[0m\t")
     end
     io.write("\n")
@@ -137,7 +139,7 @@ function view(data_table)
     for _, row in pairs(data_table) do
         for col_name, col_width in pairs(column_widths) do
             local value = tostring(row[col_name] or "")
-            value = value .. string.rep(" ", col_width - #value)
+            value = value .. string.rep(" ", col_width - length(value))
             io.write(value .. "\t")
         end
         io.write("\n")

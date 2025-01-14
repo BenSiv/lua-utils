@@ -34,3 +34,10 @@ local transposed_data = transpose(test_data1)
 print("transpose Test:")
 show(transposed_data)
 print()
+
+
+test_data1 = {
+    {name = "Alice", content = "this is a long note content written to test the view function of a dataframe", content2 = "here is another content piece"},
+    {name = "Bob", content = "30", content2 = "what happend if this part is too long to fit the screen size of the terminal?"},
+    {name = "Charlie", content = "22", content2 = "here is another content piece"}
+}
