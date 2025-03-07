@@ -304,7 +304,12 @@ function slice(source, start_index, end_index)
     return result
 end
 
-function endswith(str, suffix)
+function starts_with(str, prefix)
+    local result = slice(str, 1, length(prefix))
+    return prefix == result
+end
+
+function ends_with(str, suffix)
     local result = slice(str, length(str) - length(suffix) + 1, length(str))
     return suffix == result
 end
@@ -739,6 +744,8 @@ utils.copy = copy
 utils.replace = replace
 utils.empty = empty
 utils.slice = slice
+utils.starts_with = starts_with
+utils.ends_with = ends_with
 utils.reverse = reverse
 utils.readdir = readdir
 utils.insert = insert
