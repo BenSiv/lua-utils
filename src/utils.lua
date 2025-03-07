@@ -83,9 +83,24 @@ function show(object)
 end
 
 -- Length alias for the # symbol
-function length(tbl)
-    local len = #tbl
-    return len
+-- function length(tbl)
+--     local len = #tbl
+--     return len
+-- end
+
+function length(containable)
+    local cnt
+    if type(containable) == "string" then
+        cnt = #containable
+    elseif type(containable) == "table" then
+        cnt = 0
+        for _, _ in pairs(containable) do
+            cnt = cnt + 1
+        end
+    else
+        print("Unsupported type given")
+    end
+    return cnt
 end
 
 -- Round a number
@@ -287,6 +302,11 @@ function slice(source, start_index, end_index)
         error("ERROR: can't slice element of type: " .. type(source))
     end
     return result
+end
+
+function endswith(str, suffix)
+    local result = slice(str, length(str) - length(suffix) + 1, length(str))
+    return suffix == result
 end
 
 -- Splits a string by delimiter to a table
