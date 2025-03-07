@@ -89,7 +89,7 @@ function transpose(data_table)
 end
 
 -- Pretty print a dataframe
-function view(data_table)
+function view(data_table, limit)
     if isempty(data_table) then
         print("Empty table")
         return
@@ -136,13 +136,27 @@ function view(data_table)
     io.write("\n")
 
     -- Print rows
-    for _, row in pairs(data_table) do
-        for col_name, col_width in pairs(column_widths) do
-            local value = tostring(row[col_name] or "")
-            value = value .. string.rep(" ", col_width - length(value))
-            io.write(value .. "\t")
+    if limit then
+        for num, row in pairs(data_table) do
+            if num >= limit then
+                break
+            end
+            for col_name, col_width in pairs(column_widths) do
+                local value = tostring(row[col_name] or "")
+                value = value .. string.rep(" ", col_width - length(value))
+                io.write(value .. "\t")
+            end
+            io.write("\n")
         end
-        io.write("\n")
+    else
+        for _, row in pairs(data_table) do
+            for col_name, col_width in pairs(column_widths) do
+                local value = tostring(row[col_name] or "")
+                value = value .. string.rep(" ", col_width - length(value))
+                io.write(value .. "\t")
+            end
+            io.write("\n")
+        end
     end
 end
 
