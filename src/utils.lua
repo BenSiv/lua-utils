@@ -3,6 +3,7 @@ local utils = {}
 
 local lfs = require("lfs")
 local yaml = require("yaml")
+local json = require("dkjson")
 
 -- Exposes all functions to global scope
 function using(source)
@@ -419,6 +420,20 @@ function read_yaml(file_path)
         local content = file:read("*all")
         -- data = yaml.load(content)
         data = yaml.eval(content)
+        file:close()
+    end
+    return data
+end
+
+function read_json(file_path)
+    local file = io.open(file_path, "r")
+    local data
+    if not file then
+        error("Failed to read file: " .. file_path)
+    else
+        local content = file:read("*all")
+        -- data = yaml.load(content)
+        data = json.decode(content)
         file:close()
     end
     return data
