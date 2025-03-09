@@ -6,35 +6,19 @@ function bold(str)
 end
 
 function color(str, clr)
+    
     local color_dict = {
-        blue = {
-            before = "\27[34m",
-            after = "\27[0m"
-        },
-        yellow = {
-            before = "\27[33m",
-            after = "\27[0m"
-        },
-        red = {
-            before = "\27[31m",
-            after = "\27[0m"
-        },
-        green = {
-            before = "\27[32m",
-            after = "\27[0m"
-        },
-        purple = {
-            before = "\27[35m",
-            after = "\27[0m"
-        },
-        orange = {
-            before = "\27[38;5;214m", -- Orange is not standard in ANSI, so using an extended color
-            after = "\27[0m"
-        }
+        white = "\27[0m",
+        blue = "\27[34m",
+        yellow = "\27[33m",
+        red = "\27[31m",
+        green = "\27[32m",
+        purple = "\27[35m",
+        orange = "\27[38;5;214m"
     }
 
     if color_dict[clr] then
-        print(color_dict[clr].before .. str .. color_dict[clr].after)
+        print(color_dict[clr] .. str .. color_dict["white"])
     else
         print(str) -- Default to no color if invalid color name is provided
     end

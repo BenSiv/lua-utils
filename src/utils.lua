@@ -467,28 +467,38 @@ end
 -- Merge function to merge two sorted arrays
 local function merge(left, right)
     local result = {}
-    local left_index, right_index = 1, 1
+    local left_size, right_size = #left, #right
+    local left_index, right_index, result_index = 1, 1, 1
 
-    while left_index <= length(left) and right_index <= length(right) do
+    -- Pre-allocate size
+    for _ = 1, left_size + right_size do
+        result[result_index] = {}
+        result_index = result_index + 1
+    end
+
+    result_index = 1
+    while left_index <= left_size and right_index <= right_size do
         if left[left_index] < right[right_index] then
-            table.insert(result, left[left_index])
+            result[result_index] = left[left_index]
             left_index = left_index + 1
         else
-            table.insert(result, right[right_index])
+            result[result_index] = right[right_index]
             right_index = right_index + 1
         end
+        result_index = result_index + 1
     end
 
-    -- Append remaining elements from left array
-    while left_index <= length(left) do
-        table.insert(result, left[left_index])
+    -- Append remaining elements
+    while left_index <= left_size do
+        result[result_index] = left[left_index]
         left_index = left_index + 1
+        result_index = result_index + 1
     end
 
-    -- Append remaining elements from right array
-    while right_index <= length(right) do
-        table.insert(result, right[right_index])
+    while right_index <= right_size do
+        result[result_index] = right[right_index]
         right_index = right_index + 1
+        result_index = result_index + 1
     end
 
     return result
@@ -496,7 +506,7 @@ end
 
 -- Merge Sort function
 local function merge_sort(array)
-    local len_array = length(array)
+    local len_array = #array
 
     -- Base case: If array has one or zero elements, it's already sorted
     if len_array <= 1 then
@@ -529,7 +539,7 @@ local function merge_with_indices(left, right)
     local result = {}
     local left_index, right_index = 1, 1
 
-    while left_index <= length(left) and right_index <= length(right) do
+    while left_index <= #left and right_index <= #right do
         if left[left_index].value < right[right_index].value then
             table.insert(result, left[left_index])
             left_index = left_index + 1
@@ -540,13 +550,13 @@ local function merge_with_indices(left, right)
     end
 
     -- Append remaining elements from left array
-    while left_index <= length(left) do
+    while left_index <= #left do
         table.insert(result, left[left_index])
         left_index = left_index + 1
     end
 
     -- Append remaining elements from right array
-    while right_index <= length(right) do
+    while right_index <= #right do
         table.insert(result, right[right_index])
         right_index = right_index + 1
     end
@@ -556,22 +566,20 @@ end
 
 -- Merge Sort function along with indices
 local function merge_sort_with_indices(array, _inner)
-    local len_array = length(array)
-
     -- _inner recursion boolean flag
     if not _inner then
-        for i = 1, len_array do
+        for i = 1, #array do
             array[i] =  {value = array[i], index = i}
         end
     end
 
     -- Base case: If array has one or zero elements, it's already sorted
-    if len_array <= 1 then
+    if #array <= 1 then
         return array
     end
 
     -- Split the array into two halves
-    local middle = math.floor(len_array / 2)
+    local middle = math.floor(#array / 2)
     local left = {}
     local right = {}
 
@@ -579,7 +587,7 @@ local function merge_sort_with_indices(array, _inner)
         table.insert(left, array[i])
     end
 
-    for i = middle + 1, len_array do
+    for i = middle + 1, #array do
         table.insert(right, array[i])
 
     end
