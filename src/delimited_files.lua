@@ -26,7 +26,7 @@ local function dlm_split(str, delimiter)
     return result
 end
 
--- Reads a delimited file into a table, assums correct format, loads all data as string
+-- Reads a delimited file into a table, assumes correct format, loads all data as string
 local function readdlm(filename, delimiter, header)
     local file = io.open(filename, "r")
     if not file then
@@ -37,6 +37,7 @@ local function readdlm(filename, delimiter, header)
     local data = {}
     local cols = {}
     local line_count = 1
+    local num_cols = 0
 
     for line in file:lines() do
         -- Remove trailing '\r' character from line end
@@ -47,20 +48,29 @@ local function readdlm(filename, delimiter, header)
         if header and line_count == 1 then
             -- Use the first line as keys
             cols = copy(fields)
+            num_cols = length(cols)
+
         else
-            -- If not a header line or header is false, use numeric indices
+            -- Create a new table for each row
             local entry = {}
-            for i, value in ipairs(fields) do
-                -- Check if the value can be converted to a number
-                local num_value = tonumber(value)
-                if num_value then
-                    value = num_value
+
+            if header then
+                -- Initialize all keys with empty strings
+                for _, col in ipairs(cols) do
+                    entry[col] = ""
                 end
 
-                if header then
-                    entry[cols[i]] = value
-                else
-                    table.insert(entry, value)
+                -- Populate values
+                for i, value in ipairs(fields) do
+                    local num_value = tonumber(value)
+                    entry[cols[i]] = num_value or value or ""
+                end
+            else
+                -- For rows without a header, fill missing values with empty strings
+                for i = 1, num_cols do
+                    local value = fields[i] or ""
+                    local num_value = tonumber(value)
+                    table.insert(entry, num_value or value)
                 end
             end
             table.insert(data, entry)
