@@ -265,6 +265,85 @@ local function diff(tbl, col)
     return result
 end
 
+local function innerjoin(df1, df2, columns, prefixes)
+    prefixes = prefixes or {"df1", "df2"}
+    local joined_df = {}
+
+    -- Convert join columns to a set for quick lookup
+    local join_columns = {}
+    for _, col in ipairs(columns) do
+        join_columns[col] = true
+    end
+
+    -- Identify overlapping non-join columns
+    local df1_columns, df2_columns = {}, {}
+    for _, row in ipairs(df1) do
+        for col in pairs(row) do
+            if not join_columns[col] then
+                df1_columns[col] = true
+            end
+        end
+    end
+    for _, row in ipairs(df2) do
+        for col in pairs(row) do
+            if not join_columns[col] then
+                df2_columns[col] = true
+            end
+        end
+    end
+
+    local shared_columns = {}
+    for col in pairs(df1_columns) do
+        if df2_columns[col] then
+            shared_columns[col] = true
+        end
+    end
+
+    -- Helper to check if rows match on the join columns
+    local function rows_match(row1, row2, columns)
+        for _, col in ipairs(columns) do
+            if row1[col] ~= row2[col] then
+                return false
+            end
+        end
+        return true
+    end
+
+    -- Perform the join
+    for _, row1 in ipairs(df1) do
+        for _, row2 in ipairs(df2) do
+            if rows_match(row1, row2, columns) then
+                local joined_row = {}
+
+                -- Add join columns (once)
+                for _, col in ipairs(columns) do
+                    joined_row[col] = row1[col]
+                end
+
+                -- Add non-join columns from df1
+                for col, val in pairs(row1) do
+                    if not join_columns[col] then
+                        local key = shared_columns[col] and (prefixes[1] .. "_" .. col) or col
+                        joined_row[key] = val
+                    end
+                end
+
+                -- Add non-join columns from df2
+                for col, val in pairs(row2) do
+                    if not join_columns[col] then
+                        local key = shared_columns[col] and (prefixes[2] .. "_" .. col) or col
+                        joined_row[key] = val
+                    end
+                end
+
+                table.insert(joined_df, joined_row)
+            end
+        end
+    end
+
+    return joined_df
+end
+
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
 dataframes.transpose = transpose
@@ -275,6 +354,7 @@ dataframes.sort_by = sort_by
 dataframes.select = select
 dataframes.filter = filter
 dataframes.diff = diff
+dataframes.innerjoin = innerjoin
 
 -- Export the module
 return dataframes
