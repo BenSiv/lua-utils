@@ -188,6 +188,36 @@ local function get_node_index(node_map, node_name)
     return nil
 end
 
+-- Function to get all components (connected nodes) in a DAG
+local function get_all_components(graph, node_map)
+    local visited = {}
+    local components = {}
+
+    -- DFS to collect nodes in a component
+    local function dfs(node, component)
+        if visited[node] then return end
+        visited[node] = true
+        table.insert(component, node_map[node])
+
+        if graph[node] then
+            for _, neighbor in ipairs(graph[node]) do
+                dfs(neighbor, component)
+            end
+        end
+    end
+
+    -- Iterate through all nodes in node_map
+    for index, _ in pairs(node_map) do
+        if not visited[index] then
+            local component = {}
+            dfs(index, component)
+            table.insert(components, component)
+        end
+    end
+
+    return components
+end
+
 -- Export module functions
 graphs.build_graph = build_graph
 graphs.get_all_children = get_all_children
@@ -195,5 +225,6 @@ graphs.get_all_parents = get_all_parents
 graphs.get_leaves = get_leaves
 graphs.get_roots = get_roots
 graphs.get_node_index = get_node_index
+graphs.get_all_components = get_all_components
 
 return graphs
