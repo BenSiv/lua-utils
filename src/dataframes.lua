@@ -235,6 +235,19 @@ local function select(tbl, cols)
     return result
 end
 
+-- Function to filter by column value
+local function filter(tbl, column, condition)
+    local fcon = loadstring("return function(x) return " .. condition .. " end")()
+    local result = {}
+    for row, values in pairs(tbl) do
+        local x = values[column]
+        if x and fcon(x) then
+            table.insert(result, values)
+        end
+    end
+    return result
+end
+
 -- Function to select specific columns
 local function diff(tbl, col)
     local result = {}
@@ -260,6 +273,7 @@ dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
 dataframes.sort_by = sort_by
 dataframes.select = select
+dataframes.filter = filter
 dataframes.diff = diff
 
 -- Export the module
