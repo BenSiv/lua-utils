@@ -236,13 +236,28 @@ local function select(tbl, cols)
 end
 
 -- Function to filter by column value
-local function filter(tbl, column, condition)
+local function filter_by_value(tbl, column, condition)
     local fcon = loadstring("return function(x) return " .. condition .. " end")()
     local result = {}
     for row, values in pairs(tbl) do
         local x = values[column]
         if x and fcon(x) then
             table.insert(result, values)
+        end
+    end
+    return result
+end
+
+-- Function to filter rows based on a condition involving one or two columns
+local function filter_by_columns(tbl, col1, op, col2)
+    local result = {}
+    for _, values in pairs(tbl) do
+        local v1, v2 = values[col1], values[col2]
+        if v1 and v2 then
+            local condition = loadstring(string.format("return %s %s %s", v1 ,op ,v2))
+            if condition() then
+                table.insert(result, values)
+            end
         end
     end
     return result
@@ -299,8 +314,8 @@ local function innerjoin(df1, df2, columns, prefixes)
         end
     end
 
-    -- Helper to check if rows match on the join columns
-    local function rows_match(row1, row2, columns)
+    -- Helper to check if rows match on all join columns
+    local function rows_match(row1, row2)
         for _, col in ipairs(columns) do
             if row1[col] ~= row2[col] then
                 return false
@@ -312,10 +327,10 @@ local function innerjoin(df1, df2, columns, prefixes)
     -- Perform the join
     for _, row1 in ipairs(df1) do
         for _, row2 in ipairs(df2) do
-            if rows_match(row1, row2, columns) then
+            if rows_match(row1, row2) then
                 local joined_row = {}
 
-                -- Add join columns (once)
+                -- Add join columns once
                 for _, col in ipairs(columns) do
                     joined_row[col] = row1[col]
                 end
@@ -352,7 +367,8 @@ dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
 dataframes.sort_by = sort_by
 dataframes.select = select
-dataframes.filter = filter
+dataframes.filter_by_value = filter_by_value
+dataframes.filter_by_columns = filter_by_columns
 dataframes.diff = diff
 dataframes.innerjoin = innerjoin
 
