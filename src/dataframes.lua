@@ -263,6 +263,38 @@ local function filter_by_columns(tbl, col1, op, col2)
     return result
 end
 
+-- Function to generate new column based on a transformation of pair columns
+local function generate_column(tbl, new_col, col1, op, col2)
+    new_tbl = copy(tbl)
+    for row, values in pairs(new_tbl) do
+        local v1, v2 = values[col1], values[col2]
+        if v1 and v2 then
+            local condition = loadstring(string.format("return %s %s %s", v1 ,op ,v2))
+            local result = condition()
+            if result then
+                new_tbl[row][new_col] = result
+            end
+        end
+    end
+    return new_tbl
+end
+
+-- Function to generate new column based on a transformation of pair columns
+local function transform(tbl, new_col, col1, col2, transform_fn)
+    local new_tbl = copy(tbl)
+    for row, values in pairs(new_tbl) do
+        local v1, v2 = values[col1], values[col2]
+        if v1 and v2 then
+            local result = transform_fn(v1, v2)
+            if result then
+                new_tbl[row][new_col] = result
+            end
+        end
+    end
+    return new_tbl
+end
+
+
 -- Function to select specific columns
 local function diff(tbl, col)
     local result = {}
@@ -371,6 +403,7 @@ dataframes.filter_by_value = filter_by_value
 dataframes.filter_by_columns = filter_by_columns
 dataframes.diff = diff
 dataframes.innerjoin = innerjoin
+dataframes.transform = transform
 
 -- Export the module
 return dataframes
