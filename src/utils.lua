@@ -731,6 +731,47 @@ function get_line_length()
     return 80 -- Fallback to default width
 end
 
+-- Function to execute a command and capture stdout/stderr
+function exec_command(command, log_file_path)
+    -- Open log file for writing if a log file path is provided
+    local log_file
+    if log_file_path then
+        log_file = io.open(log_file_path, "a")  -- Open in append mode
+        if not log_file then
+            error("Failed to open log file: " .. log_file_path)
+        end
+    end
+
+    local process = io.popen(command .. " 2>&1")  -- Capture both stdout and stderr
+    local output = process:read("*a")  -- Read the output
+    local success = process:close()  -- Close the process and check for success
+
+    if not success then
+        -- If the command failed, print and log the error message
+        local error_msg = "Command failed: " .. command .. "\nError: " .. output
+        if log_file then
+            log_file:write(error_msg .. "\n")
+            log_file:flush()  -- Ensure message is written immediately to the log file
+        end
+        -- Panic and print error
+        error(error_msg)
+    end
+
+    -- Log output to file if log_file is not nil
+    if log_file then
+        log_file:write(output .. "\n")
+        log_file:flush()  -- Ensure message is written immediately to the log file
+    end
+
+    -- Print output to console
+    print(output)
+
+    -- Close the log file if it was opened
+    if log_file then
+        log_file:close()
+    end
+end
+
 utils.using = using
 utils.escape_string = escape_string
 utils.unescape_string = unescape_string
@@ -769,6 +810,7 @@ utils.apply = apply
 utils.save_table = save_table
 utils.load_table = load_table
 utils.get_line_length = get_line_length
+utils.exec_command = exec_command
 
 -- Export the module
 return utils
