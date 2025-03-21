@@ -731,42 +731,44 @@ function get_line_length()
     return 80 -- Fallback to default width
 end
 
--- Function to execute a command and capture stdout/stderr
 function exec_command(command, log_file_path)
-    -- Open log file for writing if a log file path is provided
+    -- Open log file for appending if provided
     local log_file
     if log_file_path then
-        log_file = io.open(log_file_path, "a")  -- Open in append mode
+        log_file = io.open(log_file_path, "a")
         if not log_file then
             error("Failed to open log file: " .. log_file_path)
         end
     end
 
-    local process = io.popen(command .. " 2>&1")  -- Capture both stdout and stderr
+    -- Ensure stderr is always redirected to the log file
+    if log_file_path then
+        command = command .. " 2>> " .. log_file_path
+    end
+
+    local process = io.popen(command)  -- Only stdout is captured here
     local output = process:read("*a")  -- Read the output
     local success = process:close()  -- Close the process and check for success
 
     if not success then
-        -- If the command failed, print and log the error message
+        -- If the command failed, log the error
         local error_msg = "Command failed: " .. command .. "\nError: " .. output
         if log_file then
             log_file:write(error_msg .. "\n")
-            log_file:flush()  -- Ensure message is written immediately to the log file
+            log_file:flush()
         end
-        -- Panic and print error
         error(error_msg)
     end
 
-    -- Log output to file if log_file is not nil
+    -- Log output if needed
     if log_file then
         log_file:write(output .. "\n")
-        log_file:flush()  -- Ensure message is written immediately to the log file
+        log_file:flush()
     end
 
-    -- Print output to console
     print(output)
 
-    -- Close the log file if it was opened
+    -- Close log file if opened
     if log_file then
         log_file:close()
     end
