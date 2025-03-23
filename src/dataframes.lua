@@ -263,6 +263,30 @@ local function filter_by_columns(tbl, col1, op, col2)
     return result
 end
 
+function filter_unique(tbl, column)
+    local count = {}
+    
+    -- Count occurrences of each value in the specified column
+    for _, row in pairs(tbl) do
+        local val = row[column]
+        if val then
+            count[val] = (count[val] or 0) + 1
+        end
+    end
+    
+    -- Collect rows where the column value appears only once
+    local filtered = {}
+    local index = 1
+    for _, row in pairs(tbl) do
+        if count[row[column]] == 1 then
+            filtered[index] = row
+            index = index + 1
+        end
+    end
+    
+    return filtered
+end
+
 -- Function to generate new column based on a transformation of pair columns
 local function generate_column(tbl, new_col, col1, op, col2)
     new_tbl = copy(tbl)
@@ -391,6 +415,92 @@ local function innerjoin(df1, df2, columns, prefixes)
     return joined_df
 end
 
+
+local function innerjoin_multiple(tables, columns, prefixes)
+    prefixes = prefixes or {}
+    local joined_table = {}
+    local join_columns = {}
+    
+    -- Convert join columns to a set for quick lookup
+    for _, col in ipairs(columns) do
+        join_columns[col] = true
+    end
+    
+    -- Identify overlapping non-join columns across all tables
+    local column_sets = {}
+    for i, tbl in ipairs(tables) do
+        column_sets[i] = {}
+        for _, row in ipairs(tbl) do
+            for col in pairs(row) do
+                if not join_columns[col] then
+                    column_sets[i][col] = true
+                end
+            end
+        end
+    end
+    
+    -- Determine shared columns across multiple tables
+    local shared_columns = {}
+    for i = 1, #tables - 1 do
+        for col in pairs(column_sets[i]) do
+            for j = i + 1, #tables do
+                if column_sets[j][col] then
+                    shared_columns[col] = true
+                end
+            end
+        end
+    end
+    
+    -- Helper to check if rows match on all join columns
+    local function rows_match(rows)
+        for _, col in ipairs(columns) do
+            local val = rows[1][col]
+            for i = 2, #rows do
+                if rows[i][col] ~= val then
+                    return false
+                end
+            end
+        end
+        return true
+    end
+    
+    -- Generate the Cartesian product and filter valid joins
+    local function join_recursive(depth, selected_rows)
+        if depth > #tables then
+            if rows_match(selected_rows) then
+                local joined_row = {}
+                
+                -- Add join columns once
+                for _, col in ipairs(columns) do
+                    joined_row[col] = selected_rows[1][col]
+                end
+                
+                -- Add non-join columns with prefixes if necessary
+                for i, row in ipairs(selected_rows) do
+                    local prefix = prefixes[i] or ("tbl" .. i)
+                    for col, val in pairs(row) do
+                        if not join_columns[col] then
+                            local key = shared_columns[col] and (prefix .. "_" .. col) or col
+                            joined_row[key] = val
+                        end
+                    end
+                end
+                
+                table.insert(joined_table, joined_row)
+            end
+            return
+        end
+        
+        for _, row in ipairs(tables[depth]) do
+            selected_rows[depth] = row
+            join_recursive(depth + 1, selected_rows)
+        end
+    end
+    
+    join_recursive(1, {})
+    return joined_table
+end
+
 dataframes.is_dataframe = is_dataframe
 dataframes.view = view
 dataframes.transpose = transpose
@@ -401,9 +511,12 @@ dataframes.sort_by = sort_by
 dataframes.select = select
 dataframes.filter_by_value = filter_by_value
 dataframes.filter_by_columns = filter_by_columns
+dataframes.filter_unique = filter_unique
+dataframes.generate_column = generate_column
+dataframes.transform = transform
 dataframes.diff = diff
 dataframes.innerjoin = innerjoin
-dataframes.transform = transform
+dataframes.innerjoin_multiple = innerjoin_multiple
 
 -- Export the module
 return dataframes

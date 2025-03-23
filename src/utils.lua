@@ -103,6 +103,14 @@ function length(containable)
     return cnt
 end
 
+function swap_keys_values(tbl)
+    local swapped = {}
+    for k, v in pairs(tbl) do
+        swapped[v] = k
+    end
+    return swapped
+end
+
 -- Round a number
 function round(value, decimal)
     local factor = 10 ^ (decimal or 0)
@@ -783,6 +791,7 @@ utils.repeat_string = repeat_string
 utils.show = show
 utils.show_table = show_table
 utils.length = length
+utils.swap_keys_values = swap_keys_values
 utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
