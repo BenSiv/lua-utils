@@ -89,7 +89,12 @@ function transpose(data_table)
 end
 
 -- Pretty print a dataframe
-function view(data_table, limit)
+function view(data_table, args)
+	args = args or {}
+    -- Extract keyword arguments
+    local limit = args.limit
+    local columns = args.columns
+
     if isempty(data_table) then
         print("Empty table")
         return
@@ -101,12 +106,20 @@ function view(data_table, limit)
     -- Get terminal line length
     local line_length = get_line_length()
 
+    -- If no specific columns are provided, use all columns from the first row
+    if not columns or #columns == 0 then
+        columns = {}
+        for col_name, _ in pairs(data_table[1]) do
+            table.insert(columns, col_name)
+        end
+    end
+
     -- Calculate column widths
     local column_widths = {}
     for _, row in pairs(data_table) do
-        for col_name, col_value in pairs(row) do
-            local col_width = length(tostring(col_name))
-            local val_width = length(tostring(col_value))
+        for _, col_name in ipairs(columns) do
+            local col_width = #tostring(col_name)
+            local val_width = #tostring(row[col_name] or "")
             column_widths[col_name] = math.max(column_widths[col_name] or 0, col_width, val_width)
         end
     end
@@ -119,44 +132,35 @@ function view(data_table, limit)
 
     -- Constrain total width to line length
     if total_width > line_length then
-        local available_width = line_length - length(column_widths) -- Subtract space for separators
-        local width_per_column = math.floor(available_width / length(column_widths))
-        for col_name, _ in pairs(column_widths) do
+        local available_width = line_length - #columns -- Subtract space for separators
+        local width_per_column = math.floor(available_width / #columns)
+        for _, col_name in ipairs(columns) do
             column_widths[col_name] = math.min(column_widths[col_name], width_per_column)
         end
     end
 
     -- Print column headers in bold
-    for key, col_width in pairs(column_widths) do
+    for _, col_name in ipairs(columns) do
         io.write("\27[1m")
-        local padded_key = tostring(key)
-        padded_key = padded_key .. string.rep(" ", col_width - length(padded_key))
+        local padded_key = tostring(col_name)
+        padded_key = padded_key .. string.rep(" ", column_widths[col_name] - #padded_key)
         io.write(padded_key .. "\27[0m\t")
     end
     io.write("\n")
 
     -- Print rows
-    if limit then
-        for num, row in pairs(data_table) do
-            if num >= limit then
-                break
-            end
-            for col_name, col_width in pairs(column_widths) do
-                local value = tostring(row[col_name] or "")
-                value = value .. string.rep(" ", col_width - length(value))
-                io.write(value .. "\t")
-            end
-            io.write("\n")
+    local row_count = 0
+    for _, row in pairs(data_table) do
+        if limit and row_count >= limit then
+            break
         end
-    else
-        for _, row in pairs(data_table) do
-            for col_name, col_width in pairs(column_widths) do
-                local value = tostring(row[col_name] or "")
-                value = value .. string.rep(" ", col_width - length(value))
-                io.write(value .. "\t")
-            end
-            io.write("\n")
+        for _, col_name in ipairs(columns) do
+            local value = tostring(row[col_name] or "")
+            value = value .. string.rep(" ", column_widths[col_name] - #value)
+            io.write(value .. "\t")
         end
+        io.write("\n")
+        row_count = row_count + 1
     end
 end
 
