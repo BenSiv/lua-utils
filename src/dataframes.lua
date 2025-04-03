@@ -88,6 +88,25 @@ function transpose(data_table)
     return transposed_table
 end
 
+function get_columns(data_table)
+    -- Check if the data table is empty or not a valid dataframe
+    if isempty(data_table) then
+        print("Empty table")
+        return {}
+    elseif not is_dataframe(data_table) then
+        print("Not a valid dataframe")
+        return {}
+    end
+
+    -- Retrieve the column names from the first row
+    local columns = {}
+    for col_name, _ in pairs(data_table[1]) do
+        table.insert(columns, col_name)
+    end
+
+    return columns
+end
+
 -- Pretty print a dataframe
 function view(data_table, args)
 	args = args or {}
@@ -323,7 +342,7 @@ local function transform(tbl, new_col, col1, col2, transform_fn)
 end
 
 
--- Function to select specific columns
+-- Function to rows on specific columns
 local function diff(tbl, col)
     local result = {}
     local last_value = 0
@@ -506,6 +525,7 @@ local function innerjoin_multiple(tables, columns, prefixes)
 end
 
 dataframes.is_dataframe = is_dataframe
+dataframes.get_columns = get_columns
 dataframes.view = view
 dataframes.transpose = transpose
 dataframes.groupby = groupby
