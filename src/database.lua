@@ -198,6 +198,7 @@ database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
 database.export_delimited = export_delimited
+database.load_df = load_df
 
 -- Export the module
 return database
