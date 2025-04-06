@@ -118,7 +118,7 @@ end
 
 
 -- Writes a delimited file from a table
-local function writedlm(filename, delimiter, data, header, append)
+local function writedlm(filename, delimiter, data, header, append, column_order)
     local file
 
     if append then
@@ -132,15 +132,26 @@ local function writedlm(filename, delimiter, data, header, append)
         return
     end
 
+    -- Determine the column order (use the first row's keys if not provided)
+    if not column_order then
+        -- Get the keys from the first row to determine the column order
+        column_order = keys(data[1])
+    end
+
     -- Write header line if header is true
     if header then
-        local header_line = table.concat(keys(data[keys(data)[1]]), delimiter)
+        local header_line = table.concat(column_order, delimiter)
         file:write(header_line .. "\n")
     end
 
     -- Write data lines
     for i, row in ipairs(data) do
-        local line = table.concat(values(row), delimiter)
+        local line_parts = {}
+        -- Ensure the values are written in the same order as column_order
+        for _, col in ipairs(column_order) do
+            table.insert(line_parts, row[col])
+        end
+        local line = table.concat(line_parts, delimiter)
         file:write(line .. "\n")
     end
 
