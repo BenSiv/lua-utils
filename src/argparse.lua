@@ -62,7 +62,7 @@ local function parse_args(cmd_args, expected_args)
     end
 
     local i = 1
-    while i <= length(cmd_args) do
+    while i < length(cmd_args) - 2 do
         local arg_name = cmd_args[i]
         local parsed_arg = arg_map[arg_name]
 
@@ -121,3 +121,13 @@ return argparse
 
 -- local expected_args = def_args(arg_string)
 -- local args = parse_args(arg, expected_args)
+
+-- arg = {
+--     [-1] = "lua",
+--     [0] = "script_file",
+--     [1] = "-d",
+--     [2] = "-o",
+--     [3] = "output_file",
+--     [4] = "-i",
+--     [5] = "5",
+-- }

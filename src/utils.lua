@@ -3,6 +3,7 @@ local utils = {}
 
 local lfs = require("lfs")
 local yaml = require("yaml")
+local json = require("dkjson")
 
 -- Exposes all functions to global scope
 function using(source)
@@ -26,11 +27,16 @@ function read(path)
     return content
 end
 
--- write file content
-function write(path, content)
-    local file = io.open(path, "w")
+-- write content to file
+function write(path, content, append)
+    if append then
+        local file = io.open(path, "a")
+    else
+        local file = io.open(path, "w")
+    end
+
     if file then
-        content = file:write(content)
+        file:write(content)
         file:close()
     else
         print("Failed to open " .. path)
@@ -82,9 +88,32 @@ function show(object)
 end
 
 -- Length alias for the # symbol
-function length(tbl)
-    local len = #tbl
-    return len
+-- function length(tbl)
+--     local len = #tbl
+--     return len
+-- end
+
+function length(containable)
+    local cnt
+    if type(containable) == "string" then
+        cnt = #containable
+    elseif type(containable) == "table" then
+        cnt = 0
+        for _, _ in pairs(containable) do
+            cnt = cnt + 1
+        end
+    else
+        print("Unsupported type given")
+    end
+    return cnt
+end
+
+function swap_keys_values(tbl)
+    local swapped = {}
+    for k, v in pairs(tbl) do
+        swapped[v] = k
+    end
+    return swapped
 end
 
 -- Round a number
@@ -288,6 +317,16 @@ function slice(source, start_index, end_index)
     return result
 end
 
+function starts_with(str, prefix)
+    local result = slice(str, 1, length(prefix))
+    return prefix == result
+end
+
+function ends_with(str, suffix)
+    local result = slice(str, length(str) - length(suffix) + 1, length(str))
+    return suffix == result
+end
+
 -- Splits a string by delimiter to a table
 function split(str, delimiter)
     local result = {}
@@ -424,31 +463,55 @@ function read_yaml(file_path)
     return data
 end
 
+function read_json(file_path)
+    local file = io.open(file_path, "r")
+    local data
+    if not file then
+        error("Failed to read file: " .. file_path)
+    else
+        local content = file:read("*all")
+        -- data = yaml.load(content)
+        data = json.decode(content)
+        file:close()
+    end
+    return data
+end
+
 -- Merge function to merge two sorted arrays
 local function merge(left, right)
     local result = {}
-    local left_index, right_index = 1, 1
+    local left_size, right_size = #left, #right
+    local left_index, right_index, result_index = 1, 1, 1
 
-    while left_index <= length(left) and right_index <= length(right) do
+    -- Pre-allocate size
+    for _ = 1, left_size + right_size do
+        result[result_index] = {}
+        result_index = result_index + 1
+    end
+
+    result_index = 1
+    while left_index <= left_size and right_index <= right_size do
         if left[left_index] < right[right_index] then
-            table.insert(result, left[left_index])
+            result[result_index] = left[left_index]
             left_index = left_index + 1
         else
-            table.insert(result, right[right_index])
+            result[result_index] = right[right_index]
             right_index = right_index + 1
         end
+        result_index = result_index + 1
     end
 
-    -- Append remaining elements from left array
-    while left_index <= length(left) do
-        table.insert(result, left[left_index])
+    -- Append remaining elements
+    while left_index <= left_size do
+        result[result_index] = left[left_index]
         left_index = left_index + 1
+        result_index = result_index + 1
     end
 
-    -- Append remaining elements from right array
-    while right_index <= length(right) do
-        table.insert(result, right[right_index])
+    while right_index <= right_size do
+        result[result_index] = right[right_index]
         right_index = right_index + 1
+        result_index = result_index + 1
     end
 
     return result
@@ -456,7 +519,7 @@ end
 
 -- Merge Sort function
 local function merge_sort(array)
-    local len_array = length(array)
+    local len_array = #array
 
     -- Base case: If array has one or zero elements, it's already sorted
     if len_array <= 1 then
@@ -489,7 +552,7 @@ local function merge_with_indices(left, right)
     local result = {}
     local left_index, right_index = 1, 1
 
-    while left_index <= length(left) and right_index <= length(right) do
+    while left_index <= #left and right_index <= #right do
         if left[left_index].value < right[right_index].value then
             table.insert(result, left[left_index])
             left_index = left_index + 1
@@ -500,13 +563,13 @@ local function merge_with_indices(left, right)
     end
 
     -- Append remaining elements from left array
-    while left_index <= length(left) do
+    while left_index <= #left do
         table.insert(result, left[left_index])
         left_index = left_index + 1
     end
 
     -- Append remaining elements from right array
-    while right_index <= length(right) do
+    while right_index <= #right do
         table.insert(result, right[right_index])
         right_index = right_index + 1
     end
@@ -516,22 +579,20 @@ end
 
 -- Merge Sort function along with indices
 local function merge_sort_with_indices(array, _inner)
-    local len_array = length(array)
-
     -- _inner recursion boolean flag
     if not _inner then
-        for i = 1, len_array do
+        for i = 1, #array do
             array[i] =  {value = array[i], index = i}
         end
     end
 
     -- Base case: If array has one or zero elements, it's already sorted
-    if len_array <= 1 then
+    if #array <= 1 then
         return array
     end
 
     -- Split the array into two halves
-    local middle = math.floor(len_array / 2)
+    local middle = math.floor(#array / 2)
     local left = {}
     local right = {}
 
@@ -539,7 +600,7 @@ local function merge_sort_with_indices(array, _inner)
         table.insert(left, array[i])
     end
 
-    for i = middle + 1, len_array do
+    for i = middle + 1, #array do
         table.insert(right, array[i])
 
     end
@@ -683,6 +744,56 @@ function get_line_length()
     return 80 -- Fallback to default width
 end
 
+-- function exec_command(command, log_file_path)
+--     -- Open log file for appending if provided
+--     local log_file
+--     if log_file_path then
+--         log_file = io.open(log_file_path, "a")
+--         if not log_file then
+--             error("Failed to open log file: " .. log_file_path)
+--         end
+--     end
+
+--     -- Ensure stderr is always redirected to the log file
+--     if log_file_path then
+--         command = command .. " 2>> " .. log_file_path
+--     end
+
+--     local process = io.popen(command)  -- Only stdout is captured here
+--     local output = process:read("*a")  -- Read the output
+--     local success = process:close()  -- Close the process and check for success
+
+--     if not success then
+--         -- If the command failed, log the error
+--         local error_msg = "Command failed: " .. command .. "\nError: " .. output
+--         if log_file then
+--             log_file:write(error_msg .. "\n")
+--             log_file:flush()
+--         end
+--         error(error_msg)
+--     end
+
+--     -- Log output if needed
+--     if log_file then
+--         log_file:write(output .. "\n")
+--         log_file:flush()
+--     end
+
+--     print(output)
+
+--     -- Close log file if opened
+--     if log_file then
+--         log_file:close()
+--     end
+-- end
+
+function exec_command(command)
+    local process = io.popen(command)  -- Only stdout is captured here
+    local output = process:read("*a")  -- Read the output
+    local success = process:close()  -- Close the process and check for success
+    return output, success
+end
+
 utils.using = using
 utils.escape_string = escape_string
 utils.unescape_string = unescape_string
@@ -692,6 +803,7 @@ utils.repeat_string = repeat_string
 utils.show = show
 utils.show_table = show_table
 utils.length = length
+utils.swap_keys_values = swap_keys_values
 utils.in_table = in_table
 utils.in_string = in_string
 utils.occursin = occursin
@@ -704,6 +816,8 @@ utils.copy = copy
 utils.replace = replace
 utils.empty = empty
 utils.slice = slice
+utils.starts_with = starts_with
+utils.ends_with = ends_with
 utils.reverse = reverse
 utils.readdir = readdir
 utils.insert = insert
@@ -719,6 +833,7 @@ utils.apply = apply
 utils.save_table = save_table
 utils.load_table = load_table
 utils.get_line_length = get_line_length
+utils.exec_command = exec_command
 
 -- Export the module
 return utils
