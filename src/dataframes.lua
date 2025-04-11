@@ -22,7 +22,7 @@ function is_dataframe(tbl)
     for index, row in pairs(tbl) do
         local valid_row_content = type(row) == "table"
         local valid_row_index = type(index) == "number"
-        if not valid_row_content and not valid_row_index then
+        if not valid_row_content or not valid_row_index then
             return false
         end
 
@@ -30,7 +30,7 @@ function is_dataframe(tbl)
         for col_name, col_value in pairs(row) do
             local valid_col_name = type(col_name) == "string"
             local valid_col_value = type(col_value) == "number" or type(col_value) == "string"
-            if not valid_col_name and not valid_col_value then
+            if not valid_col_name or not valid_col_value then
                 return false
             end
             current_num_columns = current_num_columns + 1
@@ -38,7 +38,7 @@ function is_dataframe(tbl)
 
         if num_columns == nil then
             num_columns = current_num_columns
-        elseif num_columns ~= current_num_columns then
+        elseif current_num_columns ~= num_columns then
             return false
         end
     end

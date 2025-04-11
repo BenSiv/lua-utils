@@ -29,10 +29,11 @@ end
 
 -- write content to file
 function write(path, content, append)
+    local file
     if append then
-        local file = io.open(path, "a")
+        file = io.open(path, "a")
     else
-        local file = io.open(path, "w")
+        file = io.open(path, "w")
     end
 
     if file then
@@ -794,6 +795,28 @@ function exec_command(command)
     return output, success
 end
 
+function breakpoint()
+  local level = 2  -- 1 would be inside this function, 2 is the caller
+  local i = 1
+  while true do
+    local name, value = debug.getlocal(level, i)
+    if not name then break end
+    _G[name] = value
+    i = i + 1
+  end
+  debug.debug()
+end
+
+function show_methods(obj)
+    for key, value in pairs(obj) do
+        if type(value) == "function" then
+            print("Function: " .. key)
+        else
+            print("Key: " .. key .. " -> " .. tostring(value))
+        end
+    end
+end
+
 utils.using = using
 utils.escape_string = escape_string
 utils.unescape_string = unescape_string
@@ -834,6 +857,8 @@ utils.save_table = save_table
 utils.load_table = load_table
 utils.get_line_length = get_line_length
 utils.exec_command = exec_command
+utils.breakpoint = breakpoint
+utils.show_methods = show_methods
 
 -- Export the module
 return utils

@@ -7,13 +7,26 @@ local function get_parent_dir(path)
     return parent_dir
 end
 
+local function remove_trailing_slash(path)
+    -- Remove the trailing slash if it exists
+    return path:gsub("[\\/]+$", "")
+end
+
 local function get_file_name(path)
     return path:match("([^\\/]+)$")
 end
 
 local function get_dir_name(path)
-    path = path:gsub("[\\/]+$", "") -- Remove trailing slashes
-    return path:match(".*/([^/]*)/[^/]+$")
+	path = "/" .. path
+	local dir_name
+	local file_name = get_file_name(path)
+	if file_name then
+		dir_name = path:match(".*/([^/]*)/[^/]+$")
+	else
+		path = remove_trailing_slash(path)
+		dir_name = get_file_name(path)
+	end
+	return dir_name
 end
 
 local function get_script_path()
