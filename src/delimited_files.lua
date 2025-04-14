@@ -73,50 +73,6 @@ local function readdlm(filename, delimiter, header)
     return data
 end
 
--- local function readdlm(filename, delimiter, header)
---     local file = io.open(filename, "r")
---     if not file then
---         print("Error opening file: " .. filename)
---         return
---     end
-
---     local data = {}
---     local cols = {}
---     local line_count = 1
-
---     for line in file:lines() do
---         -- Remove trailing '\r' character from line end
---         line = replace_string(line, "\r$", "")
-
---         local fields = dlm_split(line, delimiter)
---         local entry = {}
-
---         if header then
---             if line_count == 1 then
---                 cols = copy(fields)
---             else
---                 for i, col in ipairs(cols) do
---                     local value = fields[i]
---                     local num_value = tonumber(value)
---                     entry[col] = num_value or value
---                 end
---             end
---         else
---             for _, value in ipairs(fields) do
---                 num_value = tonumber(value)
---                 table.insert(entry, num_value or value)
---             end
---         end
-
---         table.insert(data, entry)
---         line_count = line_count + 1
---     end
-
---     file:close()
---     return data
--- end
-
-
 -- Writes a delimited file from a table
 local function writedlm(filename, delimiter, data, header, append, column_order)
     local file

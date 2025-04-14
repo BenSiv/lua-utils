@@ -390,18 +390,6 @@ function readdir(directory)
     return files
 end
 
--- function insert(tbl, element)
---     if type(tbl) ~= "table" then
---         error("Input is not a table")
---     end
-
---     new_tbl = copy_table(tbl)
-
---     table.insert(tbl, element)
-
---     return new_tbl
--- end
-
 function keys(tbl)
     if type(tbl) ~= "table" then
         error("Input is not a table")
@@ -431,24 +419,6 @@ function sleep(n)
     local t0 = clock()
     while clock() - t0 <= n do end
 end
-
--- function read_yaml(file_path)
---     local file = io.open(file_path, "r")
---     if not file then
---         return nil, "Failed to open file: " .. file_path
---     end
-
---     local data = {}
---     for line in file:lines() do
---         local key, value = line:match("([^:]+):%s*(.+)")
---         if key and value then
---             data[key] = value
---         end
---     end
-
---     file:close()
---     return data
--- end
 
 function read_yaml(file_path)
     local file = io.open(file_path, "r")
@@ -744,49 +714,6 @@ function get_line_length()
     end
     return 80 -- Fallback to default width
 end
-
--- function exec_command(command, log_file_path)
---     -- Open log file for appending if provided
---     local log_file
---     if log_file_path then
---         log_file = io.open(log_file_path, "a")
---         if not log_file then
---             error("Failed to open log file: " .. log_file_path)
---         end
---     end
-
---     -- Ensure stderr is always redirected to the log file
---     if log_file_path then
---         command = command .. " 2>> " .. log_file_path
---     end
-
---     local process = io.popen(command)  -- Only stdout is captured here
---     local output = process:read("*a")  -- Read the output
---     local success = process:close()  -- Close the process and check for success
-
---     if not success then
---         -- If the command failed, log the error
---         local error_msg = "Command failed: " .. command .. "\nError: " .. output
---         if log_file then
---             log_file:write(error_msg .. "\n")
---             log_file:flush()
---         end
---         error(error_msg)
---     end
-
---     -- Log output if needed
---     if log_file then
---         log_file:write(output .. "\n")
---         log_file:flush()
---     end
-
---     print(output)
-
---     -- Close log file if opened
---     if log_file then
---         log_file:close()
---     end
--- end
 
 function exec_command(command)
     local process = io.popen(command)  -- Only stdout is captured here
