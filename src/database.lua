@@ -27,7 +27,7 @@ local function local_query(db_path, query)
     for row in stmt:rows() do
         table.insert(result_rows, row)
         for col_name, _ in pairs(row) do
-            column_names[col_name] = true
+        	table.insert(column_names, col_name)
         end
     end
 
@@ -38,13 +38,8 @@ local function local_query(db_path, query)
         return nil
     end
 
-    local all_columns = {}
-    for col_name, _ in pairs(column_names) do
-        table.insert(all_columns, col_name)
-    end
-
     for _, row in ipairs(result_rows) do
-        for _, col_name in ipairs(all_columns) do
+        for _, col_name in ipairs(column_names) do
             if row[col_name] == nil then
                 row[col_name] = ""
             end
