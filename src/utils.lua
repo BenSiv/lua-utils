@@ -104,7 +104,7 @@ function length(containable)
             cnt = cnt + 1
         end
     else
-        print("Unsupported type given")
+        error("Unsupported type given")
     end
     return cnt
 end
@@ -168,8 +168,7 @@ function occursin(element, source)
     elseif type(source) == "string" then
         return in_string(element, source)
     else
-        print("Unsupported type given")
-        return false
+        error("Unsupported type given")
     end
 end
 
