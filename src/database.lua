@@ -137,8 +137,6 @@ end
 local function load_df(db_path, table_name, dataframe)
     -- Check if the provided dataframe is valid
     if not is_dataframe(dataframe) then
-        -- print("Error: The provided table is not a valid dataframe.")
-        -- return nil
         error("The provided table is not a valid dataframe.")
     end
 

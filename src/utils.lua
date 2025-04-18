@@ -168,6 +168,8 @@ function occursin(element, source)
     elseif type(source) == "string" then
         return in_string(element, source)
     else
+    	print("Element: ", element)
+    	print("Source: ", source)
         error("Unsupported type given")
     end
 end
@@ -741,6 +743,24 @@ function show_methods(obj)
             print("Key: " .. key .. " -> " .. tostring(value))
         end
     end
+end
+
+-- Draw a progress bar
+function draw_progress(current, total)
+    local width = get_line_length()
+    local bar_width = width - 10 -- Room for percentage and brackets
+    local percent = current / total
+    local completed = math.floor(bar_width * percent)
+    local remaining = bar_width - completed
+
+    io.write("\r[")
+    io.write(string.rep("=", completed))
+    if remaining > 0 then
+        io.write(">")
+        io.write(string.rep(" ", remaining - 1))
+    end
+    io.write(string.format("] %3d%%", percent * 100))
+    io.flush()
 end
 
 utils.using = using
