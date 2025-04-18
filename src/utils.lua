@@ -761,6 +761,11 @@ function draw_progress(current, total)
     end
     io.write(string.format("] %3d%%", percent * 100))
     io.flush()
+
+    -- Automatically move to a new line when finished
+    if current == total then
+        io.write("\n")
+    end
 end
 
 utils.using = using
