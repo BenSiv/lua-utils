@@ -805,6 +805,7 @@ utils.get_line_length = get_line_length
 utils.exec_command = exec_command
 utils.breakpoint = breakpoint
 utils.show_methods = show_methods
+utils.draw_progress = draw_progress
 
 -- Export the module
 return utils
