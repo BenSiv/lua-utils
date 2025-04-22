@@ -1,4 +1,8 @@
-require("utils").using("utils")
+local utils = require("utils")
+local length = utils.length
+local copy = utils.copy
+local keys = utils.keys
+
 
 -- Define a module table
 local delimited_files = {}

@@ -541,6 +541,7 @@ dataframes.transform = transform
 dataframes.diff = diff
 dataframes.innerjoin = innerjoin
 dataframes.innerjoin_multiple = innerjoin_multiple
+dataframes.array_to_df = array_to_df
 
 -- Export the module
 return dataframes

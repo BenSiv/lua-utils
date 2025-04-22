@@ -5,6 +5,10 @@ local lfs = require("lfs")
 local yaml = require("yaml")
 local json = require("dkjson")
 
+local string_utils = require("string_utils")
+local repeat_string = string_utils.repeat_string
+local escape_string = string_utils.escape_string
+
 -- Exposes all functions to global scope
 local function using(source)
     module = require(source)
@@ -42,15 +46,6 @@ local function write(path, content, append)
     else
         print("Failed to open " .. path)
     end
-end
-
--- Repeats a string n times into a new concatenated string
-local function repeat_string(str, n)
-    local result = ""
-    for i = 1, n do
-        result = result .. str
-    end
-    return result
 end
 
 -- Pretty print a table
@@ -109,14 +104,6 @@ local function length(containable)
     return cnt
 end
 
-local function swap_keys_values(tbl)
-    local swapped = {}
-    for k, v in pairs(tbl) do
-        swapped[v] = k
-    end
-    return swapped
-end
-
 -- Round a number
 local function round(value, decimal)
     local factor = 10 ^ (decimal or 0)
@@ -172,16 +159,6 @@ local function occursin(element, source)
     	print("Source: ", source)
         error("Unsupported type given")
     end
-end
-
-local function unique(tbl)
-    result = {}
-    for _, element in pairs(tbl) do 
-        if not occursin(element, result) then
-            table.insert(result, element)
-        end
-    end
-    return result
 end
 
 local function isempty(source)
@@ -242,17 +219,6 @@ local function replace_table(tbl, old, new)
         end
     end
     return new_table
-end
-
--- Escape special characters string
-local function escape_string(str)
-    local new_str = str:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
-    return new_str
-end
-
-local function unescape_string(str)
-    local new_str = str:gsub("%%([%[%]%(%)%.%+%-%*%%])", "%1")
-    return new_str
 end
 
 -- Returns new table with replaced value
@@ -319,45 +285,6 @@ local function slice(source, start_index, end_index)
     return result
 end
 
-local function starts_with(str, prefix)
-    local result = slice(str, 1, length(prefix))
-    return prefix == result
-end
-
-local function ends_with(str, suffix)
-    local result = slice(str, length(str) - length(suffix) + 1, length(str))
-    return suffix == result
-end
-
--- Splits a string by delimiter to a table
-local function split(str, delimiter)
-    local result = {}
-    local token = ""
-    local pos = 1
-    local delimiter_length = length(delimiter)
-    local str_length = length(str)
-
-    while pos <= str_length do
-        -- Check if the substring from pos to pos + delimiter_length - 1 matches the delimiter
-        if str:sub(pos, pos + delimiter_length - 1) == delimiter then
-            if token ~= "" then
-                table.insert(result, token)
-                token = ""
-            end
-            pos = pos + delimiter_length
-        else
-            token = token .. str:sub(pos, pos)
-            pos = pos + 1
-        end
-    end
-
-    if token ~= "" then
-        table.insert(result, token)
-    end
-
-    return result
-end
-
 -- Reverse order of composable type, only top level
 local function reverse(input)
 
@@ -389,30 +316,6 @@ local function readdir(directory)
         end
     end
     return files
-end
-
-local function keys(tbl)
-    if type(tbl) ~= "table" then
-        error("Input is not a table")
-    end
-
-    local keys = {}
-    for key, _ in pairs(tbl) do
-        table.insert(keys, key)
-    end
-    return keys
-end
-
-local function values(tbl)
-    if type(tbl) ~= "table" then
-        error("Input is not a table")
-    end
-
-    local values = {}
-    for _, value in pairs(tbl) do
-        table.insert(values, value)
-    end
-    return values
 end
 
 local function sleep(n)
@@ -804,36 +707,22 @@ end
 
 
 utils.using = using
-utils.escape_string = escape_string
-utils.unescape_string = unescape_string
 utils.read = read
-utils.split = split
-utils.repeat_string = repeat_string
 utils.show = show
-utils.show_table = show_table
 utils.length = length
-utils.swap_keys_values = swap_keys_values
-utils.in_table = in_table
-utils.in_string = in_string
 utils.occursin = occursin
-utils.unique = unique
 utils.isempty = isempty
 utils.match = match
 utils.match_all = match_all
-utils.copy_table = copy_table
 utils.copy = copy
 utils.replace = replace
 utils.empty = empty
 utils.slice = slice
-utils.starts_with = starts_with
-utils.ends_with = ends_with
 utils.reverse = reverse
 utils.readdir = readdir
-utils.insert = insert
-utils.keys = keys
-utils.values = values
 utils.sleep = sleep
 utils.read_yaml = read_yaml
+utils.read_json = read_json
 utils.sort = merge_sort
 utils.sort_with_indices = merge_sort_with_indices
 utils.get_sorted_indices = get_sorted_indices
