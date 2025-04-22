@@ -188,11 +188,28 @@ local function load_df(db_path, table_name, dataframe)
     return true
 end
 
+function get_tables(db_path)
+	local db = sqlite3.open(db_path)
+    if not db then
+        print("Error opening database")
+        return nil
+    end
+    
+	table_list = {}
+	for row in db:rows("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';") do
+	    table.insert(table_list, row.name)
+	end
+
+	db:close()
+	return table_list
+end
+
 database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
 database.export_delimited = export_delimited
 database.load_df = load_df
+database.get_tables = get_tables
 
 -- Export the module
 return database
