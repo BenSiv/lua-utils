@@ -188,7 +188,7 @@ local function load_df(db_path, table_name, dataframe)
     return true
 end
 
-function get_tables(db_path)
+local function get_tables(db_path)
 	local db = sqlite3.open(db_path)
     if not db then
         print("Error opening database")

@@ -9,7 +9,7 @@ local dataframes = {}
 -- second keys are columns of type string
 
 -- Validate if a table is a DataFrame
-function is_dataframe(tbl)
+local function is_dataframe(tbl)
     if type(tbl) ~= "table" then
         return false
     end
@@ -47,7 +47,7 @@ function is_dataframe(tbl)
 end
 
 -- Converts all keys to a string type
-function string_keys(obj)
+local function string_keys(obj)
     if type(obj) ~= "table" then
         return obj
     end
@@ -69,7 +69,7 @@ function string_keys(obj)
 end
 
 -- Transposes a dataframe
-function transpose(data_table)
+local function transpose(data_table)
     -- if not is_dataframe(data_table) then
     --     print("Not a valid dataframe.")
     --     return
@@ -88,7 +88,7 @@ function transpose(data_table)
     return transposed_table
 end
 
-function get_columns(data_table)
+local function get_columns(data_table)
     -- Check if the data table is empty or not a valid dataframe
     if isempty(data_table) then
         print("Empty table")
@@ -108,7 +108,7 @@ function get_columns(data_table)
 end
 
 -- Pretty print a dataframe
-function view(data_table, args)
+local function view(data_table, args)
 	args = args or {}
     -- Extract keyword arguments
     local limit = args.limit
@@ -183,7 +183,7 @@ function view(data_table, args)
     end
 end
 
-function array_to_df(array)
+local function array_to_df(array)
     local df = {}
     for idx, val in pairs(array) do
         table.insert(df, {index = idx, value = val})
@@ -192,7 +192,7 @@ function array_to_df(array)
 end
 
 -- Function to group data by a specified key
-function groupby(data, key)
+local function groupby(data, key)
     local groups = {}
     for _, entry in ipairs(data) do
         local group_key = entry[key]
@@ -205,7 +205,7 @@ function groupby(data, key)
 end
 
 -- Function to sum values in a table
-function sum_values(data, key)
+local function sum_values(data, key)
     local total = 0
     for _, entry in ipairs(data) do
         total = total + entry[key]
@@ -214,7 +214,7 @@ function sum_values(data, key)
 end
 
 -- Function to compute the mean of values in a table
-function mean_values(data, key)
+local function mean_values(data, key)
     local total = 0
     local count = 0
     for _, entry in ipairs(data) do
@@ -286,7 +286,7 @@ local function filter_by_columns(tbl, col1, op, col2)
     return result
 end
 
-function filter_unique(tbl, column)
+local function filter_unique(tbl, column)
     local count = {}
     
     -- Count occurrences of each value in the specified column

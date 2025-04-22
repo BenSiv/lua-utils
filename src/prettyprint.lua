@@ -1,11 +1,11 @@
 -- Define a module table
 local prettyprint = {}
 
-function bold(str)
+local function bold(str)
     print("\27[1m" .. str .. "\27[0m")
 end
 
-function color(str, clr)
+local function color(str, clr)
     
     local color_dict = {
         white = "\27[0m",
