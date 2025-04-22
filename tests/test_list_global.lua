@@ -1,12 +1,14 @@
-local list_globals = require("utils").list_globals
+local user_defined_globals = require("utils").user_defined_globals
 local show = require("utils").show
 
+-- Add some new globals
 a = 5
 
 function test_main()
-	-- do nothing
+    -- do nothing
 end
 
 b = {}
 
-show(list_globals())
+-- Show only the new globals
+show(user_defined_globals())

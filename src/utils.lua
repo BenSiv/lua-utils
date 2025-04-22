@@ -779,6 +779,30 @@ local function list_globals()
     return result
 end
 
+utils.default_globals = list_globals()
+
+local function user_defined_globals()
+    local is_default_global = {}
+   
+    for _, entry in ipairs(utils.default_globals) do
+        is_default_global[entry.name] = true
+    end
+    
+
+    local user_globals = {}
+    for k, v in pairs(_G) do
+        if not is_default_global[k] then
+            table.insert(user_globals, {
+                name = k,
+                type = type(v)
+            })
+        end
+    end
+
+    return user_globals
+end
+
+
 utils.using = using
 utils.escape_string = escape_string
 utils.unescape_string = unescape_string
@@ -823,6 +847,7 @@ utils.breakpoint = breakpoint
 utils.show_methods = show_methods
 utils.draw_progress = draw_progress
 utils.list_globals = list_globals
+utils.user_defined_globals = user_defined_globals
 
 -- Export the module
 return utils
