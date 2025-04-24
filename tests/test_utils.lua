@@ -42,4 +42,7 @@ function test_is_array()
     print(is_array({}))
 end
 
-test_is_array()
+-- test_is_array()
+
+
+show(user_defined_globals())

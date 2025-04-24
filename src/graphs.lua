@@ -1,5 +1,3 @@
-require("utils").using("utils")
-
 -- Define a module table
 local graphs = {}
 

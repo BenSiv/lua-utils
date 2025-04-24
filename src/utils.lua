@@ -5,9 +5,20 @@ local lfs = require("lfs")
 local yaml = require("yaml")
 local json = require("dkjson")
 
+-- Function to merge one module into another
+local function merge_module(target, source)
+	local env = getfenv(1)  -- Get the current function's environment (i.e., the module scope)
+  	for k, v in pairs(source) do
+    	target[k] = v
+    	env[k] = v
+  	end
+end
+
 local string_utils = require("string_utils")
-local repeat_string = string_utils.repeat_string
-local escape_string = string_utils.escape_string
+merge_module(utils, string_utils)
+
+local table_utils = require("table_utils")
+merge_module(utils, table_utils)
 
 -- Exposes all functions to global scope
 local function using(source)
