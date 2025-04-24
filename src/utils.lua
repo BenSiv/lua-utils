@@ -5,8 +5,12 @@ local lfs = require("lfs")
 local yaml = require("yaml")
 local json = require("dkjson")
 
+local string_utils = require("string_utils")
+local repeat_string = string_utils.repeat_string
+local escape_string = string_utils.escape_string
+
 -- Exposes all functions to global scope
-function using(source)
+local function using(source)
     module = require(source)
     for name,func in pairs(module) do
         _G[name] = func
@@ -14,7 +18,7 @@ function using(source)
 end
 
 -- Read file content
-function read(path)
+local function read(path)
     local file = io.open(path, "r")
     local content = nil
     if file then
@@ -27,24 +31,21 @@ function read(path)
     return content
 end
 
--- write file content
-function write(path, content)
-    local file = io.open(path, "w")
+-- write content to file
+local function write(path, content, append)
+    local file
+    if append then
+        file = io.open(path, "a")
+    else
+        file = io.open(path, "w")
+    end
+
     if file then
-        content = file:write(content)
+        file:write(content)
         file:close()
     else
         print("Failed to open " .. path)
     end
-end
-
--- Repeats a string n times into a new concatenated string
-local function repeat_string(str, n)
-    local result = ""
-    for i = 1, n do
-        result = result .. str
-    end
-    return result
 end
 
 -- Pretty print a table
@@ -74,7 +75,7 @@ end
 
 
 -- Pretty print generic
-function show(object)
+local function show(object)
     if type(object) ~= "table" then
         print(object)
     else
@@ -88,7 +89,7 @@ end
 --     return len
 -- end
 
-function length(containable)
+local function length(containable)
     local cnt
     if type(containable) == "string" then
         cnt = #containable
@@ -98,13 +99,13 @@ function length(containable)
             cnt = cnt + 1
         end
     else
-        print("Unsupported type given")
+        error("Unsupported type given")
     end
     return cnt
 end
 
 -- Round a number
-function round(value, decimal)
+local function round(value, decimal)
     local factor = 10 ^ (decimal or 0)
     return math.floor(value * factor + 0.5) / factor
 end
@@ -148,28 +149,19 @@ local function in_string(element, some_string)
 end
 
 -- Generic function to check if an element is present in a composable type
-function occursin(element, source)
+local function occursin(element, source)
     if type(source) == "table" then
         return in_table(element, source)
     elseif type(source) == "string" then
         return in_string(element, source)
     else
-        print("Unsupported type given")
-        return false
+    	print("Element: ", element)
+    	print("Source: ", source)
+        error("Unsupported type given")
     end
 end
 
-function unique(tbl)
-    result = {}
-    for _, element in pairs(tbl) do 
-        if not occursin(element, result) then
-            table.insert(result, element)
-        end
-    end
-    return result
-end
-
-function isempty(source)
+local function isempty(source)
     local answer = false
     if source and (type(source) == "table" or type(source) == "string") then
         if length(source) == 0 then
@@ -182,12 +174,12 @@ function isempty(source)
 end
 
 -- Syntax sugar for match
-function match(where, what)
+local function match(where, what)
     return string.match(where, what)
 end
 
 -- Syntax sugar for gmatch
-function match_all(where, what)
+local function match_all(where, what)
     return string.gmatch(where, what)
 end
 
@@ -205,7 +197,7 @@ local function copy_table(tbl)
 end
 
 -- Generic copy
-function copy(source)
+local function copy(source)
     if type(source) == "table" then
         new_copy = copy_table(source)
     else
@@ -215,7 +207,7 @@ function copy(source)
 end
 
 -- Returns new table with replaced value
-function replace_table(tbl, old, new)
+local function replace_table(tbl, old, new)
     local new_table = {}
     for key, value in pairs(tbl) do
         if type(value) == "table" then
@@ -229,26 +221,15 @@ function replace_table(tbl, old, new)
     return new_table
 end
 
--- Escape special characters string
-function escape_string(str)
-    local new_str = str:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
-    return new_str
-end
-
-function unescape_string(str)
-    local new_str = str:gsub("%%([%[%]%(%)%.%+%-%*%%])", "%1")
-    return new_str
-end
-
 -- Returns new table with replaced value
-function replace_string(str, old, new)
+local function replace_string(str, old, new)
     old = escape_string(old)
     local output_str = str:gsub(old, new)
     return output_str
 end
 
 -- Returns new table with replaced value
-function replace(container, old, new)
+local function replace(container, old, new)
     if type(container) == "table" then
         answer = replace_table(container, old, new)
     elseif type(container) == "string" then
@@ -261,7 +242,7 @@ function replace(container, old, new)
 end
 
 -- Generic function to return the 0 value of type
-function empty(reference)
+local function empty(reference)
     local new_var
 
     if type(reference) == "number" then
@@ -293,7 +274,7 @@ local function slice_string(source, start_index, end_index)
 end
 
 -- Generic slice function for composable types
-function slice(source, start_index, end_index)
+local function slice(source, start_index, end_index)
     if type(source) == "table" then
         result = slice_table(source, start_index, end_index)
     elseif type(source) == "string" then
@@ -304,47 +285,8 @@ function slice(source, start_index, end_index)
     return result
 end
 
-function starts_with(str, prefix)
-    local result = slice(str, 1, length(prefix))
-    return prefix == result
-end
-
-function ends_with(str, suffix)
-    local result = slice(str, length(str) - length(suffix) + 1, length(str))
-    return suffix == result
-end
-
--- Splits a string by delimiter to a table
-function split(str, delimiter)
-    local result = {}
-    local token = ""
-    local pos = 1
-    local delimiter_length = length(delimiter)
-    local str_length = length(str)
-
-    while pos <= str_length do
-        -- Check if the substring from pos to pos + delimiter_length - 1 matches the delimiter
-        if str:sub(pos, pos + delimiter_length - 1) == delimiter then
-            if token ~= "" then
-                table.insert(result, token)
-                token = ""
-            end
-            pos = pos + delimiter_length
-        else
-            token = token .. str:sub(pos, pos)
-            pos = pos + 1
-        end
-    end
-
-    if token ~= "" then
-        table.insert(result, token)
-    end
-
-    return result
-end
-
 -- Reverse order of composable type, only top level
-function reverse(input)
+local function reverse(input)
 
     if type(input) == "string" then
         reversed = ""
@@ -365,7 +307,7 @@ function reverse(input)
     return reversed
 end
 
-function readdir(directory)
+local function readdir(directory)
     directory = directory or "."
     local files = {}
     for file in lfs.dir(directory) do
@@ -376,67 +318,13 @@ function readdir(directory)
     return files
 end
 
--- function insert(tbl, element)
---     if type(tbl) ~= "table" then
---         error("Input is not a table")
---     end
-
---     new_tbl = copy_table(tbl)
-
---     table.insert(tbl, element)
-
---     return new_tbl
--- end
-
-function keys(tbl)
-    if type(tbl) ~= "table" then
-        error("Input is not a table")
-    end
-
-    local keys = {}
-    for key, _ in pairs(tbl) do
-        table.insert(keys, key)
-    end
-    return keys
-end
-
-function values(tbl)
-    if type(tbl) ~= "table" then
-        error("Input is not a table")
-    end
-
-    local values = {}
-    for _, value in pairs(tbl) do
-        table.insert(values, value)
-    end
-    return values
-end
-
-function sleep(n)
+local function sleep(n)
     local clock = os.clock
     local t0 = clock()
     while clock() - t0 <= n do end
 end
 
--- function read_yaml(file_path)
---     local file = io.open(file_path, "r")
---     if not file then
---         return nil, "Failed to open file: " .. file_path
---     end
-
---     local data = {}
---     for line in file:lines() do
---         local key, value = line:match("([^:]+):%s*(.+)")
---         if key and value then
---             data[key] = value
---         end
---     end
-
---     file:close()
---     return data
--- end
-
-function read_yaml(file_path)
+local function read_yaml(file_path)
     local file = io.open(file_path, "r")
     local data
     if not file then
@@ -450,7 +338,7 @@ function read_yaml(file_path)
     return data
 end
 
-function read_json(file_path)
+local function read_json(file_path)
     local file = io.open(file_path, "r")
     local data
     if not file then
@@ -660,7 +548,7 @@ local function apply(func, tbl, level, key, _current_level)
 end
 
 -- Helper function to serialize table to string
-function serialize(tbl)
+local function serialize(tbl)
     local str = "{"
     for k, v in pairs(tbl) do
         if type(k) == "number" then
@@ -682,7 +570,7 @@ function serialize(tbl)
 end
 
 -- Function to save a Lua table to a file
-function save_table(filename, tbl)
+local function save_table(filename, tbl)
     local file = io.open(filename, "w")
     if file then
         file:write("return ")
@@ -694,7 +582,7 @@ function save_table(filename, tbl)
 end
 
 -- Function to load a Lua table from a file
-function load_table(filename)
+local function load_table(filename)
     local chunk, err = loadfile(filename)
     if chunk then
         return chunk()
@@ -704,7 +592,7 @@ function load_table(filename)
     end
 end
 
-function is_array(tbl)
+local function is_array(tbl)
     if type(tbl) ~= "table" then
         return false
     end
@@ -721,7 +609,7 @@ function is_array(tbl)
 end
 
 -- Get the terminal line length
-function get_line_length()
+local function get_line_length()
     local handle = io.popen("stty size 2>/dev/null | awk '{print $2}'")
     if handle then
         local result = handle:read("*a")
@@ -731,36 +619,110 @@ function get_line_length()
     return 80 -- Fallback to default width
 end
 
+local function exec_command(command)
+    local process = io.popen(command)  -- Only stdout is captured here
+    local output = process:read("*a")  -- Read the output
+    local success = process:close()  -- Close the process and check for success
+    return output, success
+end
+
+local function breakpoint()
+  local level = 2  -- 1 would be inside this function, 2 is the caller
+  local i = 1
+  while true do
+    local name, value = debug.getlocal(level, i)
+    if not name then break end
+    _G[name] = value
+    i = i + 1
+  end
+  debug.debug()
+end
+
+local function show_methods(obj)
+    for key, value in pairs(obj) do
+        if type(value) == "function" then
+            print("Function: " .. key)
+        else
+            print("Key: " .. key .. " -> " .. tostring(value))
+        end
+    end
+end
+
+-- Draw a progress bar
+local function draw_progress(current, total)
+    local width = get_line_length()
+    local bar_width = width - 10 -- Room for percentage and brackets
+    local percent = current / total
+    local completed = math.floor(bar_width * percent)
+    local remaining = bar_width - completed
+
+    io.write("\r[")
+    io.write(string.rep("=", completed))
+    if remaining > 0 then
+        io.write(">")
+        io.write(string.rep(" ", remaining - 1))
+    end
+    io.write(string.format("] %3d%%", percent * 100))
+    io.flush()
+
+    -- Automatically move to a new line when finished
+    if current == total then
+        io.write("\n")
+    end
+end
+
+local function list_globals()
+    local result = {}
+    for k, v in pairs(_G) do
+        table.insert(result, {
+            name = tostring(k),
+            type = type(v)
+        })
+    end
+    return result
+end
+
+utils.default_globals = list_globals()
+
+local function user_defined_globals()
+    local is_default_global = {}
+   
+    for _, entry in ipairs(utils.default_globals) do
+        is_default_global[entry.name] = true
+    end
+    
+
+    local user_globals = {}
+    for k, v in pairs(_G) do
+        if not is_default_global[k] then
+            table.insert(user_globals, {
+                name = k,
+                type = type(v)
+            })
+        end
+    end
+
+    return user_globals
+end
+
+
 utils.using = using
-utils.escape_string = escape_string
-utils.unescape_string = unescape_string
 utils.read = read
-utils.split = split
-utils.repeat_string = repeat_string
 utils.show = show
-utils.show_table = show_table
 utils.length = length
-utils.in_table = in_table
-utils.in_string = in_string
 utils.occursin = occursin
-utils.unique = unique
 utils.isempty = isempty
 utils.match = match
 utils.match_all = match_all
-utils.copy_table = copy_table
 utils.copy = copy
 utils.replace = replace
 utils.empty = empty
 utils.slice = slice
-utils.starts_with = starts_with
-utils.ends_with = ends_with
 utils.reverse = reverse
 utils.readdir = readdir
-utils.insert = insert
-utils.keys = keys
-utils.values = values
 utils.sleep = sleep
 utils.read_yaml = read_yaml
+utils.read_json = read_json
 utils.sort = merge_sort
 utils.sort_with_indices = merge_sort_with_indices
 utils.get_sorted_indices = get_sorted_indices
@@ -769,6 +731,12 @@ utils.apply = apply
 utils.save_table = save_table
 utils.load_table = load_table
 utils.get_line_length = get_line_length
+utils.exec_command = exec_command
+utils.breakpoint = breakpoint
+utils.show_methods = show_methods
+utils.draw_progress = draw_progress
+utils.list_globals = list_globals
+utils.user_defined_globals = user_defined_globals
 
 -- Export the module
 return utils

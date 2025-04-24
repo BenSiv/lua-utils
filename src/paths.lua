@@ -7,6 +7,28 @@ local function get_parent_dir(path)
     return parent_dir
 end
 
+local function remove_trailing_slash(path)
+    -- Remove the trailing slash if it exists
+    return path:gsub("[\\/]+$", "")
+end
+
+local function get_file_name(path)
+    return path:match("([^\\/]+)$")
+end
+
+local function get_dir_name(path)
+	path = "/" .. path
+	local dir_name
+	local file_name = get_file_name(path)
+	if file_name then
+		dir_name = path:match(".*/([^/]*)/[^/]+$")
+	else
+		path = remove_trailing_slash(path)
+		dir_name = get_file_name(path)
+	end
+	return dir_name
+end
+
 local function get_script_path()
     local script_path = debug.getinfo(1, "S").source:sub(2)
     return script_path
@@ -83,6 +105,8 @@ local function create_file_if_not_exists(path)
 end
 
 paths.get_parent_dir = get_parent_dir
+paths.get_file_name = get_file_name
+paths.get_dir_name = get_dir_name
 paths.get_script_path = get_script_path
 paths.get_script_dir = get_script_dir
 paths.joinpath = joinpath

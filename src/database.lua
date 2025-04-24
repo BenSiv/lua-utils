@@ -1,5 +1,6 @@
 require("utils").using("utils")
 using("delimited_files")
+using("dataframes")
 local sqlite = require("sqlite3")
 
 -- Define a module table
@@ -26,7 +27,7 @@ local function local_query(db_path, query)
     for row in stmt:rows() do
         table.insert(result_rows, row)
         for col_name, _ in pairs(row) do
-            column_names[col_name] = true
+        	table.insert(column_names, col_name)
         end
     end
 
@@ -37,13 +38,8 @@ local function local_query(db_path, query)
         return nil
     end
 
-    local all_columns = {}
-    for col_name, _ in pairs(column_names) do
-        table.insert(all_columns, col_name)
-    end
-
     for _, row in ipairs(result_rows) do
-        for _, col_name in ipairs(all_columns) do
+        for _, col_name in ipairs(column_names) do
             if row[col_name] == nil then
                 row[col_name] = ""
             end
@@ -138,10 +134,82 @@ local function export_delimited(db_path, query, file_path, delimiter, header)
     return true
 end
 
+local function load_df(db_path, table_name, dataframe)
+    -- Check if the provided dataframe is valid
+    if not is_dataframe(dataframe) then
+        error("The provided table is not a valid dataframe.")
+    end
+
+    -- Get the columns from the dataframe
+    local columns = get_columns(dataframe)
+    
+    -- Open the SQLite database
+    local db = sqlite.open(db_path)
+    if not db then
+        print("Error opening database")
+        return nil
+    end
+
+    -- Prepare column names for the insert statement
+    local col_row = table.concat(columns, "', '")
+    local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
+
+    -- Prepare the data rows for insertion
+    local value_rows = {}
+    for _, row in ipairs(dataframe) do
+        local sql_values = {}
+        -- Get values for each column in the row
+        for _, col_name in ipairs(columns) do
+            local value = row[col_name]
+            if value and value ~= "" then
+                table.insert(sql_values, string.format("'%s'", value))
+            else
+                table.insert(sql_values, "NULL")
+            end
+        end
+        -- Format the row values
+        local row_values = string.format("(%s)", table.concat(sql_values, ", "))
+        table.insert(value_rows, row_values)
+    end
+
+    -- Complete the insert statement
+    insert_statement = insert_statement .. table.concat(value_rows, ", ") .. ";"
+
+    -- Execute the insert statement
+    local _, err = db:exec(insert_statement)
+    if err then
+        print("Error: " .. err)
+        db:close()
+        return nil
+    end
+
+    -- Close the database connection
+    db:close()
+    return true
+end
+
+local function get_tables(db_path)
+	local db = sqlite3.open(db_path)
+    if not db then
+        print("Error opening database")
+        return nil
+    end
+    
+	table_list = {}
+	for row in db:rows("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';") do
+	    table.insert(table_list, row.name)
+	end
+
+	db:close()
+	return table_list
+end
+
 database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
 database.export_delimited = export_delimited
+database.load_df = load_df
+database.get_tables = get_tables
 
 -- Export the module
 return database

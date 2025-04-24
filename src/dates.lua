@@ -7,7 +7,7 @@ require("utils").using("utils")
 -- Define a module table
 local dates = {}
 
-function pad_to_length(input, total_length, pad_char)
+local function pad_to_length(input, total_length, pad_char)
     pad_char = pad_char or '0'
     while length(input) < total_length do
         input = input .. pad_char
@@ -15,7 +15,7 @@ function pad_to_length(input, total_length, pad_char)
     return input
 end
 
-function normalize_datetime(datetime_str)
+local function normalize_datetime(datetime_str)
     local year, month, day, hour, min, sec
 
     if length(datetime_str) == 4 then
@@ -50,7 +50,7 @@ function normalize_datetime(datetime_str)
     return year .. "-" .. month .. "-" .. day .. " " .. hour .. ":" .. min .. ":" .. sec
 end
 
-function is_valid_timestamp(timestamp)
+local function is_valid_timestamp(timestamp)
     local pattern = "^%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d$"
     local answer = false
 
@@ -86,7 +86,7 @@ function is_valid_timestamp(timestamp)
 end
 
 
-function convert_date_format(input_date)
+local function convert_date_format(input_date)
     -- Split the input string based on the "." delimiter
     local day, month, year = input_date:match("(%d+).(%d+).(%d+)")
     -- Rearrange the components into the desired format "yyyy-mm-dd"
@@ -94,7 +94,7 @@ function convert_date_format(input_date)
     return output_date
 end
 
-function date_range(first_date, last_date, unit, interval)
+local function date_range(first_date, last_date, unit, interval)
 	local full_date_range = {}
 	local current_date = first_date
 	table.insert(full_date_range, current_date)
@@ -114,22 +114,22 @@ function date_range(first_date, last_date, unit, interval)
     return full_date_range
 end
 
-function disect_date(input_date)
+local function disect_date(input_date)
     local year, month, day = input_date:match("(%d+)-(%d+)-(%d+)")
     return year, month, day
 end
 
-function get_day(input_date)
+local function get_day(input_date)
     local year, month, day = disect_date(input_date)
     return day
 end
 
-function get_month(input_date)
+local function get_month(input_date)
     local year, month, day = disect_date(input_date)
     return month
 end
 
-function get_year(input_date)
+local function get_year(input_date)
     local year, month, day = disect_date(input_date)
     return year
 end

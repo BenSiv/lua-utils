@@ -1,4 +1,8 @@
-require("utils").using("utils")
+local utils = require("utils")
+local length = utils.length
+local copy = utils.copy
+local keys = utils.keys
+
 
 -- Define a module table
 local delimited_files = {}
@@ -83,52 +87,8 @@ local function readdlm(filename, delimiter, header)
     return data
 end
 
--- local function readdlm(filename, delimiter, header)
---     local file = io.open(filename, "r")
---     if not file then
---         print("Error opening file: " .. filename)
---         return
---     end
-
---     local data = {}
---     local cols = {}
---     local line_count = 1
-
---     for line in file:lines() do
---         -- Remove trailing '\r' character from line end
---         line = replace_string(line, "\r$", "")
-
---         local fields = dlm_split(line, delimiter)
---         local entry = {}
-
---         if header then
---             if line_count == 1 then
---                 cols = copy(fields)
---             else
---                 for i, col in ipairs(cols) do
---                     local value = fields[i]
---                     local num_value = tonumber(value)
---                     entry[col] = num_value or value
---                 end
---             end
---         else
---             for _, value in ipairs(fields) do
---                 num_value = tonumber(value)
---                 table.insert(entry, num_value or value)
---             end
---         end
-
---         table.insert(data, entry)
---         line_count = line_count + 1
---     end
-
---     file:close()
---     return data
--- end
-
-
 -- Writes a delimited file from a table
-local function writedlm(filename, delimiter, data, header, append)
+local function writedlm(filename, delimiter, data, header, append, column_order)
     local file
 
     if append then
@@ -142,15 +102,26 @@ local function writedlm(filename, delimiter, data, header, append)
         return
     end
 
+    -- Determine the column order (use the first row's keys if not provided)
+    if not column_order then
+        -- Get the keys from the first row to determine the column order
+        column_order = keys(data[1])
+    end
+
     -- Write header line if header is true
     if header then
-        local header_line = table.concat(keys(data[keys(data)[1]]), delimiter)
+        local header_line = table.concat(column_order, delimiter)
         file:write(header_line .. "\n")
     end
 
     -- Write data lines
     for i, row in ipairs(data) do
-        local line = table.concat(values(row), delimiter)
+        local line_parts = {}
+        -- Ensure the values are written in the same order as column_order
+        for _, col in ipairs(column_order) do
+            table.insert(line_parts, row[col])
+        end
+        local line = table.concat(line_parts, delimiter)
         file:write(line .. "\n")
     end
 

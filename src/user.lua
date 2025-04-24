@@ -3,7 +3,7 @@ require("utils").using("utils")
 -- Define a module table
 local user = {}
 
-function input(prompt)
+local function input(prompt)
     if not prompt then
         print("Prompt the user for responce!")
         return
@@ -14,7 +14,7 @@ function input(prompt)
     return answer
 end
 
-function inputs(prompt)
+local function inputs(prompt)
     if not prompt then
         print("Prompt the user for responce!")
         return
