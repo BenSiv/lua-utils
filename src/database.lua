@@ -2,6 +2,8 @@ local utils = require("utils")
 local delimited_files = require("delimited_files")
 local dataframes = require("dataframes")
 local sqlite = require("sqlite3")
+_G.sqlite3 = nil
+
 
 -- Define a module table
 local database = {}

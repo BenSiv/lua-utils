@@ -1,5 +1,6 @@
 local user_defined_globals = require("utils").user_defined_globals
 local show = require("utils").show
+local database = require("database")
 
 -- Add some new globals
 a = 5
