@@ -716,9 +716,33 @@ local function user_defined_globals()
     return user_globals
 end
 
+local function write_log_file(log_dir, filename, header, entries)
+    if not log_dir then return nil end
+
+    local file_path = joinpath(log_dir, filename)
+    local file = io.open(file_path, "w")
+    if not file then
+        print("Failed to open " .. file_path)
+        return nil
+    end
+
+    local current_datetime = os.date("%Y-%m-%d-%H-%M-%S")
+    file:write(header .. "\n")
+    file:write("-- Time stamp: " .. current_datetime .. "\n\n")
+
+    for _, entry in pairs(entries) do
+        file:write(entry)
+        file:write("\n\n")
+    end
+
+    file:close()
+    return "success"
+end
+
 
 utils.using = using
 utils.read = read
+utils.write = write
 utils.show = show
 utils.length = length
 utils.occursin = occursin
@@ -748,6 +772,7 @@ utils.show_methods = show_methods
 utils.draw_progress = draw_progress
 utils.list_globals = list_globals
 utils.user_defined_globals = user_defined_globals
+utils.write_log_file = write_log_file
 
 -- Export the module
 return utils
