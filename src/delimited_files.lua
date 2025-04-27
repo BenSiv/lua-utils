@@ -1,8 +1,4 @@
 local utils = require("utils")
-local length = utils.length
-local copy = utils.copy
-local keys = utils.keys
-
 
 -- Define a module table
 local delimited_files = {}
@@ -12,7 +8,7 @@ local function dlm_split(str, delimiter)
     local token = ""
     local pos = 1
 
-    while pos <= length(str) do
+    while pos <= utils.length(str) do
         local char = str:sub(pos, pos)
         if char == delimiter then
             table.insert(result, token)
@@ -51,9 +47,8 @@ local function readdlm(filename, delimiter, header)
 
         if header and line_count == 1 then
             -- Use the first line as keys
-            cols = copy(fields)
+            cols = utils.copy(fields)
             num_cols = length(cols)
-
         else
             -- Create a new table for each row
             local entry = {}
@@ -105,7 +100,7 @@ local function writedlm(filename, delimiter, data, header, append, column_order)
     -- Determine the column order (use the first row's keys if not provided)
     if not column_order then
         -- Get the keys from the first row to determine the column order
-        column_order = keys(data[1])
+        column_order = utils.keys(data[1])
     end
 
     -- Write header line if header is true

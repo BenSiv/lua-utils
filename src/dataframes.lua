@@ -1,4 +1,4 @@
-require("utils").using("utils")
+local utils = require("utils")
 
 -- Define a module table
 local dataframes = {}
@@ -14,7 +14,7 @@ local function is_dataframe(tbl)
         return false
     end
 
-    if length(tbl) == 0 then
+    if utils.length(tbl) == 0 then
         return false
     end
 
@@ -90,7 +90,7 @@ end
 
 local function get_columns(data_table)
     -- Check if the data table is empty or not a valid dataframe
-    if isempty(data_table) then
+    if utils.isempty(data_table) then
         print("Empty table")
         return {}
     elseif not is_dataframe(data_table) then
@@ -114,7 +114,7 @@ local function view(data_table, args)
     local limit = args.limit
     local columns = args.columns
 
-    if isempty(data_table) then
+    if utils.isempty(data_table) then
         print("Empty table")
         return
     elseif not is_dataframe(data_table) then
@@ -123,7 +123,7 @@ local function view(data_table, args)
     end
 
     -- Get terminal line length
-    local line_length = get_line_length()
+    local line_length = utils.get_line_length()
 
     -- If no specific columns are provided, use all columns from the first row
     if not columns or #columns == 0 then
@@ -236,7 +236,7 @@ local function sort_by(tbl, col)
         table.insert(to_sort, value)
     end
 
-    local indices = get_sorted_indices(to_sort)
+    local indices = utils.get_sorted_indices(to_sort)
     local sorted_table = {}
     for _, row_index in pairs(indices) do
         table.insert(sorted_table, tbl[row_index])

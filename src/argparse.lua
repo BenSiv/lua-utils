@@ -1,5 +1,5 @@
-require("utils").using("utils")
-using("dataframes")
+local utils = require("utils")
+local dataframes = require("dataframes")
 
 -- Define a module table
 local argparse = {}
@@ -17,7 +17,7 @@ local function print_help(cmd_args, expected_args)
         }
         table.insert(help_df, row)
     end
-    view(help_df)
+    dataframes.view(help_df)
     print()
 end
 
@@ -39,9 +39,9 @@ end
 local function def_args(arg_string)
     local expected_args = {}
     local short, long, arg_kind, arg_type, is_required
-    for line in match_all(arg_string, "[^\r\n]+") do
-    	if not match(line, "^$s*$") then
-        	short, long, arg_kind, arg_type, is_required = match(line, "%s*%-(%a)%s+%-%-([%a_]+)%s+(%a+)%s+(%a+)%s+(%a+)%s*")
+    for line in utils.match_all(arg_string, "[^\r\n]+") do
+    	if not utils.match(line, "^$s*$") then
+        	short, long, arg_kind, arg_type, is_required = utils.match(line, "%s*%-(%a)%s+%-%-([%a_]+)%s+(%a+)%s+(%a+)%s+(%a+)%s*")
         	is_required = is_required == "true"
         	if short and long and arg_kind and arg_type then
         		expected_args = add_arg(expected_args, short, long, arg_kind, arg_type, is_required)
@@ -62,7 +62,7 @@ local function parse_args(cmd_args, expected_args)
     end
 
     local i = 1
-    while i < length(cmd_args) - 2 do
+    while i < utils.length(cmd_args) - 2 do
         local arg_name = cmd_args[i]
         local parsed_arg = arg_map[arg_name]
 

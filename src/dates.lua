@@ -2,14 +2,14 @@
 -- local current_date = os.date("%Y-%m-%d")
 -- local converted_date = os.date("%Y-%m-%d", os.time{year=2024, month=1, day=10})
 
-require("utils").using("utils")
+local utils = require("utils")
 
 -- Define a module table
 local dates = {}
 
 local function pad_to_length(input, total_length, pad_char)
     pad_char = pad_char or '0'
-    while length(input) < total_length do
+    while utils.length(input) < total_length do
         input = input .. pad_char
     end
     return input
@@ -18,22 +18,22 @@ end
 local function normalize_datetime(datetime_str)
     local year, month, day, hour, min, sec
 
-    if length(datetime_str) == 4 then
+    if utils.length(datetime_str) == 4 then
         year = datetime_str
         month, day, hour, min, sec = "01", "01", "00", "00", "00"
-    elseif length(datetime_str) == 7 then
+    elseif utils.length(datetime_str) == 7 then
         year, month = datetime_str:match("(%d%d%d%d)-(%d%d)")
         if not (year and month) then return nil end
         day, hour, min, sec = "01", "00", "00", "00"
-    elseif length(datetime_str) == 10 then
+    elseif utils.length(datetime_str) == 10 then
         year, month, day = datetime_str:match("(%d%d%d%d)-(%d%d)-(%d%d)")
         if not (year and month and day) then return nil end
         hour, min, sec = "00", "00", "00"
-    elseif length(datetime_str) == 16 then
+    elseif utils.length(datetime_str) == 16 then
         year, month, day, hour, min = datetime_str:match("(%d%d%d%d)-(%d%d)-(%d%d) (%d%d):(%d%d)")
         if not (year and month and day and hour and min) then return nil end
         sec = "00"
-    elseif length(datetime_str) == 19 then
+    elseif utils.length(datetime_str) == 19 then
         year, month, day, hour, min, sec = datetime_str:match("(%d%d%d%d)-(%d%d)-(%d%d) (%d%d):(%d%d):(%d%d)")
         if not (year and month and day and hour and min and sec) then return nil end
     else

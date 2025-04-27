@@ -1,6 +1,5 @@
--- require("utils").using("utils")
 local http = require("socket.http")
-local json = require("json")
+local json = require("dkjson")
 
 -- URL to request
 local url = "https://api.sampleapis.com/coffee/hot"
