@@ -54,7 +54,7 @@ local function query_fasta(filename, target_id)
     return nil  -- Sequence not found
 end
 
-local function write_fasta(data, filename)
+local function write_fasta(filename, data)
     local file, err = io.open(filename, "w")
     if not file then
         error("Could not open file for writing: " .. err)
