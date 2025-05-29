@@ -54,8 +54,27 @@ local function query_fasta(filename, target_id)
     return nil  -- Sequence not found
 end
 
+local function write_fasta(filename, data)
+    local file, err = io.open(filename, "w")
+    if not file then
+        error("Could not open file for writing: " .. err)
+    end
+
+    for _, entry in ipairs(data) do
+        file:write(">" .. entry.name .. "\n")
+        -- Wrap sequence at 60 characters per line (FASTA convention)
+        local seq = entry.seq
+        for i = 1, #seq, 60 do
+            file:write(seq:sub(i, i+59) .. "\n")
+        end
+    end
+
+    file:close()
+end
+
 bioinfo.read_fasta = read_fasta
 bioinfo.query_fasta = query_fasta
+bioinfo.write_fasta = write_fasta
 
 -- Export the module
 return bioinfo
