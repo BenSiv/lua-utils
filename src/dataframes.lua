@@ -192,16 +192,51 @@ local function array_to_df(array)
 end
 
 -- Function to group data by a specified key
-local function groupby(data, key)
-    local groups = {}
-    for _, entry in ipairs(data) do
-        local group_key = entry[key]
-        if not groups[group_key] then
-            groups[group_key] = {}
-        end
-        table.insert(groups[group_key], entry)
+-- local function groupby(data, key)    
+--     local groups = {}
+--     for _, entry in ipairs(data) do
+--         local group_key = entry[key]
+--         if not groups[group_key] then
+--             groups[group_key] = {}
+--         end
+--         table.insert(groups[group_key], entry)
+--     end
+--     return groups
+-- end
+
+-- Group by multiple keys and return flat list
+local function groupby(data, keys)
+    if type(keys) == "string" then
+        keys = { keys } -- Normalize to table
     end
-    return groups
+
+    local result = {}
+    local seen = {}
+
+    for _, entry in ipairs(data) do
+        -- Build group key
+        local key_parts = {}
+        for _, k in ipairs(keys) do
+            table.insert(key_parts, tostring(entry[k]))
+        end
+        local key_string = table.concat(key_parts, "\0") -- use null as safe separator
+
+        -- Initialize group if not seen
+        if not seen[key_string] then
+            seen[key_string] = {
+                rows = {},
+            }
+            -- Add group keys to result
+            for i, k in ipairs(keys) do
+                seen[key_string][k] = entry[k]
+            end
+            table.insert(result, seen[key_string])
+        end
+
+        table.insert(seen[key_string].rows, entry)
+    end
+
+    return result
 end
 
 -- Function to sum values in a table

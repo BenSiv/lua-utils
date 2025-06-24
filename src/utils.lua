@@ -745,6 +745,7 @@ utils.read = read
 utils.write = write
 utils.show = show
 utils.length = length
+utils.is_array = is_array
 utils.occursin = occursin
 utils.isempty = isempty
 utils.match = match

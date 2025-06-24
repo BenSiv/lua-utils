@@ -43,10 +43,21 @@ local function unique(tbl)
     return result
 end
 
+function concat_arrays(...)
+    local result = {}
+    for _, t in ipairs({...}) do
+        for i = 1, #t do
+            result[#result + 1] = t[i]
+        end
+    end
+    return result
+end
+
 table_utils.swap_keys_values = swap_keys_values
 table_utils.keys = keys
 table_utils.values = values
 table_utils.unique = unique
+table_utils.concat_arrays = concat_arrays
 
 -- Export the module
 return table_utils
