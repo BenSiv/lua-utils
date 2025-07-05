@@ -119,6 +119,11 @@ local function disect_date(input_date)
     return year, month, day
 end
 
+local function disect_datetime(input_datetime)
+    local year, month, day, hour, minute, second = input_datetime:match("(%d+)-(%d+)-(%d+)-(%d+)-(%d+)-(%d+)")
+    return year, month, day, hour, minute, second
+end
+
 local function get_day(input_date)
     local year, month, day = disect_date(input_date)
     return day
@@ -138,6 +143,7 @@ dates.normalize_datetime = normalize_datetime
 dates.is_valid_timestamp = is_valid_timestamp
 dates.convert_date_format = convert_date_format
 dates.disect_date = disect_date
+dates.disect_datetime = disect_datetime
 dates.get_day = get_day
 dates.get_month = get_month
 dates.get_year = get_year

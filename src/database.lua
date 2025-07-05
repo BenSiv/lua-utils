@@ -206,12 +206,30 @@ local function get_tables(db_path)
 	return table_list
 end
 
+function get_columns(db_path, table_name)
+    local db = sqlite.open(db_path)
+    if not db then
+        error("Failed to open database at " .. db_path)
+    end
+
+    local columns = {}
+    local query = string.format("PRAGMA table_info(%s);", table_name)
+
+    for row in db:rows(query) do
+        table.insert(columns, row.name)
+    end
+
+    db:close()
+    return columns
+end
+
 database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
 database.export_delimited = export_delimited
 database.load_df = load_df
 database.get_tables = get_tables
+database.get_columns = get_columns
 
 -- Export the module
 return database
