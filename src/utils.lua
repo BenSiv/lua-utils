@@ -363,6 +363,16 @@ local function read_json(file_path)
     return data
 end
 
+local function write_json(file_path, lua_table)
+    local content = json.encode(lua_table, { indent = true })  -- pretty-print with indentation
+    local file, err = io.open(file_path, "w")
+    if not file then
+        error("Failed to write to file: " .. file_path .. " (" .. err .. ")")
+    end
+    file:write(content)
+    file:close()
+end
+
 -- Merge function to merge two sorted arrays
 local function merge(left, right)
     local result = {}
@@ -759,6 +769,7 @@ utils.readdir = readdir
 utils.sleep = sleep
 utils.read_yaml = read_yaml
 utils.read_json = read_json
+utils.write_json = write_json
 utils.sort = merge_sort
 utils.sort_with_indices = merge_sort_with_indices
 utils.get_sorted_indices = get_sorted_indices
