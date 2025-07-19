@@ -192,7 +192,7 @@ local function array_to_df(array)
 end
 
 -- Function to group data by a specified key
--- local function groupby(data, key)    
+-- local function group_by(data, key)    
 --     local groups = {}
 --     for _, entry in ipairs(data) do
 --         local group_key = entry[key]
@@ -205,7 +205,7 @@ end
 -- end
 
 -- Group by multiple keys and return flat list
-local function groupby(data, keys)
+local function group_by(data, keys)
     if type(keys) == "string" then
         keys = { keys } -- Normalize to table
     end
@@ -223,17 +223,33 @@ local function groupby(data, keys)
 
         -- Initialize group if not seen
         if not seen[key_string] then
-            seen[key_string] = {
-                rows = {},
+            local group = {
+                cols = {},
+                rows = {}
             }
-            -- Add group keys to result
-            for i, k in ipairs(keys) do
-                seen[key_string][k] = entry[k]
+            for _, k in ipairs(keys) do
+                group.cols[k] = entry[k]
             end
-            table.insert(result, seen[key_string])
+            seen[key_string] = group
+            table.insert(result, group)
         end
 
-        table.insert(seen[key_string].rows, entry)
+        -- Copy only non-group columns
+        local row = {}
+        for col, val in pairs(entry) do
+            local is_group_col = false
+            for _, k in ipairs(keys) do
+                if col == k then
+                    is_group_col = true
+                    break
+                end
+            end
+            if not is_group_col then
+                row[col] = val
+            end
+        end
+
+        table.insert(seen[key_string].rows, row)
     end
 
     return result
@@ -563,7 +579,7 @@ dataframes.is_dataframe = is_dataframe
 dataframes.get_columns = get_columns
 dataframes.view = view
 dataframes.transpose = transpose
-dataframes.groupby = groupby
+dataframes.group_by = group_by
 dataframes.sum_values = sum_values
 dataframes.mean_values = mean_values
 dataframes.sort_by = sort_by
