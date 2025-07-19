@@ -749,6 +749,90 @@ local function write_log_file(log_dir, filename, header, entries)
     return "success"
 end
 
+local function get_function_source(func)
+    local info = debug.getinfo(func, "Sln")
+    if not info or not info.source or not info.linedefined or not info.lastlinedefined then
+        return nil, "Could not retrieve debug info"
+    end
+
+    if not info.source:match("^@") then
+        return nil, "Function not defined in a file (probably loaded dynamically)"
+    end
+
+    local file_path = info.source:sub(2) -- Remove leading '@'
+
+    local file = io.open(file_path, "r")
+    if not file then
+        return nil, "Could not open file: " .. file_path
+    end
+
+    local lines = {}
+    local current_line = 1
+    for line in file:lines() do
+        if current_line >= info.linedefined and current_line <= info.lastlinedefined then
+            table.insert(lines, line)
+        end
+        if current_line > info.lastlinedefined then
+            break
+        end
+        current_line = current_line + 1
+    end
+    file:close()
+
+    return table.concat(lines, "\n")
+end
+
+-- Parse function header and first comment
+local function extract_help_from_source(source)
+    -- Extract first line with 'function ...'
+    local header = source:match("function%s+.-%b()%s*") or source:match("function%s+.-\n")
+    if header then
+        header = header:gsub("^.*function%s+", ""):gsub("%s*$", "")
+    end
+
+    -- Try multiline comment first: --[[ ... ]]
+    local comment = source:match("%-%-%[%[(.-)%]%]") 
+    if not comment then
+        -- Fallback: single line comment
+        comment = source:match("\n%s*%-%-%s*(.-)\n") or source:match("\n%s*%-%-%s*(.-)$")
+    end
+
+    if comment then
+        comment = comment:gsub("^%s+", ""):gsub("%s+$", "")
+    end
+
+    return header, comment
+end
+
+
+-- Help function
+local function help(func_name)
+    --[[
+        Prints function help 
+        Args: 
+        - func_name: string
+
+        Returns:
+        - nil
+    ]]
+    local func = _G[func_name]
+    if type(func) ~= "function" then
+        print("No function named '" .. tostring(func_name) .. "'")
+        return
+    end
+
+    local src, err = get_function_source(func)
+    if not src then
+        print("Error: " .. err)
+        return
+    end
+
+    local header, comment = extract_help_from_source(src)
+
+    if header then print("Signature: " .. header) end
+    if comment then print("Description: " .. comment) end
+end
+
 
 utils.using = using
 utils.read = read
@@ -785,6 +869,8 @@ utils.draw_progress = draw_progress
 utils.list_globals = list_globals
 utils.user_defined_globals = user_defined_globals
 utils.write_log_file = write_log_file
+utils.get_function_source = get_function_source
+utils.help = help
 
 -- Export the module
 return utils
