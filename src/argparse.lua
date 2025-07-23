@@ -95,7 +95,7 @@ local function parse_args(cmd_args, expected_args)
     for _, arg_parsed in pairs(expected_args) do
         if arg_parsed.is_required and result[arg_parsed.long] == nil then
             print("Missing required argument: --" .. arg_parsed.long .. "\n")
-            print_help(expected_args)
+            print_help(cmd_args, expected_args)
             return nil
         end
     end
