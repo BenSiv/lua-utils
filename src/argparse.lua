@@ -17,7 +17,7 @@ local function print_help(cmd_args, expected_args)
         }
         table.insert(help_df, row)
     end
-    dataframes.view(help_df)
+    dataframes.view(help_df, {columns={"short", "long", "kind", "type", "required"}})
     print()
 end
 
@@ -42,12 +42,16 @@ local function def_args(arg_string)
     for line in utils.match_all(arg_string, "[^\r\n]+") do
     	if not utils.match(line, "^$s*$") then
         	short, long, arg_kind, arg_type, is_required = utils.match(line, "%s*%-(%a)%s+%-%-([%a_]+)%s+(%a+)%s+(%a+)%s+(%a+)%s*")
+            if short == "h" or long == "help" then
+                error("short h and long help are reserved arguments")
+            end
         	is_required = is_required == "true"
         	if short and long and arg_kind and arg_type then
         		expected_args = add_arg(expected_args, short, long, arg_kind, arg_type, is_required)
         	end
         end
     end
+    expected_args = add_arg(expected_args, "h", "help", "flag", "string", false)
     return expected_args
 end
 
@@ -62,7 +66,7 @@ local function parse_args(cmd_args, expected_args)
     end
 
     local i = 1
-    while i < utils.length(cmd_args) - 2 do
+    while i <= utils.length(cmd_args) - 2 do
         local arg_name = cmd_args[i]
         local parsed_arg = arg_map[arg_name]
 
@@ -89,6 +93,12 @@ local function parse_args(cmd_args, expected_args)
         end
 
         i = i + 1
+    end
+
+    -- Check for help flag
+    if occursin("help", keys(result)) then
+        print_help(cmd_args, expected_args)
+        return nil
     end
 
     -- Check for required arguments
