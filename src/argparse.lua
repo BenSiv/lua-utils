@@ -4,21 +4,25 @@ local dataframes = require("dataframes")
 -- Define a module table
 local argparse = {}
 
-local function print_help(cmd_args, expected_args)
+local function print_help(cmd_args, expected_args, help_string)
     print("Usage: ", cmd_args[0])
-    local help_df = {}
-    for _, arg_parsed in pairs(expected_args) do
-        local row = {
-            short = "-" .. arg_parsed["short"],
-            long = "--" .. arg_parsed["long"],
-            kind = arg_parsed["arg_kind"],
-            type = arg_parsed["arg_type"],
-            required = tostring(arg_parsed["is_required"])
-        }
-        table.insert(help_df, row)
+    if help_string then
+        print(help_string)
+    else
+        print("Available arguments:")
+        local help_df = {}
+        for _, arg_parsed in pairs(expected_args) do
+            local row = {
+                short = "-" .. arg_parsed["short"],
+                long = "--" .. arg_parsed["long"],
+                kind = arg_parsed["arg_kind"],
+                type = arg_parsed["arg_type"],
+                required = tostring(arg_parsed["is_required"])
+            }
+            table.insert(help_df, row)
+        end
+        dataframes.view(help_df, {columns={"short", "long", "kind", "type", "required"}})
     end
-    dataframes.view(help_df, {columns={"short", "long", "kind", "type", "required"}})
-    print()
 end
 
 local function add_arg(expected_args, short, long, arg_kind, arg_type, is_required)
@@ -55,7 +59,7 @@ local function def_args(arg_string)
     return expected_args
 end
 
-local function parse_args(cmd_args, expected_args)
+local function parse_args(cmd_args, expected_args, help_string)
     local result = {}
     local arg_map = {}
 
@@ -72,7 +76,7 @@ local function parse_args(cmd_args, expected_args)
 
         if not parsed_arg then
             print("Unknown argument: " .. arg_name)
-            print_help(cmd_args, expected_args)
+            print_help(cmd_args, expected_args, help_string)
             return nil
         end
 
@@ -82,7 +86,7 @@ local function parse_args(cmd_args, expected_args)
             i = i + 1
             if i > length(cmd_args) then
                 print("Expected value after " .. arg_name)
-                print_help(cmd_args, expected_args)
+                print_help(cmd_args, expected_args, help_string)
                 return nil
             end
             if parsed_arg.arg_type == "number" then
@@ -97,7 +101,7 @@ local function parse_args(cmd_args, expected_args)
 
     -- Check for help flag
     if occursin("help", keys(result)) then
-        print_help(cmd_args, expected_args)
+        print_help(cmd_args, expected_args, help_string)
         return nil
     end
 
@@ -105,7 +109,7 @@ local function parse_args(cmd_args, expected_args)
     for _, arg_parsed in pairs(expected_args) do
         if arg_parsed.is_required and result[arg_parsed.long] == nil then
             print("Missing required argument: --" .. arg_parsed.long .. "\n")
-            print_help(cmd_args, expected_args)
+            print_help(cmd_args, expected_args, help_string)
             return nil
         end
     end

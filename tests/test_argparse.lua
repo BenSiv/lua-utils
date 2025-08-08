@@ -7,6 +7,13 @@ arg_string = [[
     -i --iterations arg number false
 ]]
 
+help_string = [[
+
+-d --detach: Detach the process (flag)
+-o --output: Specify the output file (arg, required)
+-i --iterations: Number of iterations to perform (arg, number)
+]]
+
 expected_args = def_args(arg_string)
 -- print_help(expected_args)
 -- show(expected_args)
@@ -27,5 +34,5 @@ expected_args = def_args(arg_string)
 --     [1] = "-h"
 -- }
 
-parsed_args = parse_args(arg, expected_args)
+parsed_args = parse_args(arg, expected_args, help_string)
 show(parsed_args)
