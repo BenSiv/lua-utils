@@ -41,6 +41,10 @@ local function split(str, delimiter)
     return result
 end
 
+local function strip(str)
+    return (str:gsub("%s+$", ""))
+end
+
 -- Escape special characters string
 local function escape_string(str)
     local new_str = str:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
@@ -62,6 +66,7 @@ local function repeat_string(str, n)
 end
 
 string_utils.split = split
+string_utils.strip = strip
 string_utils.escape_string = escape_string
 string_utils.unescape_string = unescape_string
 string_utils.repeat_string = repeat_string
