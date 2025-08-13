@@ -136,59 +136,113 @@ local function export_delimited(db_path, query, file_path, delimiter, header)
     return true
 end
 
-local function load_df(db_path, table_name, dataframe)
-    -- Check if the provided dataframe is valid
+-- Escapes single quotes for safe SQLite string usage
+local function escape_sqlite(value)
+    return tostring(value):gsub("'", "''")
+end
+
+function load_df(db_path, table_name, dataframe)
+    -- Validate dataframe
     if not dataframes.is_dataframe(dataframe) then
         error("The provided table is not a valid dataframe.")
     end
 
-    -- Get the columns from the dataframe
     local columns = dataframes.get_columns(dataframe)
-    
-    -- Open the SQLite database
+    local col_names = "'" .. table.concat(columns, "', '") .. "'"
+
+    -- Open DB
     local db = sqlite.open(db_path)
     if not db then
-        print("Error opening database")
-        return nil
+        error("Error opening database")
     end
 
-    -- Prepare column names for the insert statement
-    local col_row = table.concat(columns, "', '")
-    local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
-
-    -- Prepare the data rows for insertion
-    local value_rows = {}
-    for _, row in ipairs(dataframe) do
+    -- Insert row by row
+    for row_index, row in ipairs(dataframe) do
         local sql_values = {}
-        -- Get values for each column in the row
         for _, col_name in ipairs(columns) do
             local value = row[col_name]
             if value and value ~= "" then
-                table.insert(sql_values, string.format("'%s'", value))
+                table.insert(sql_values, string.format("'%s'", escape_sqlite(value)))
             else
                 table.insert(sql_values, "NULL")
             end
         end
-        -- Format the row values
-        local row_values = string.format("(%s)", table.concat(sql_values, ", "))
-        table.insert(value_rows, row_values)
+
+        local insert_sql = string.format(
+            "INSERT INTO %s (%s) VALUES (%s);",
+            table_name,
+            col_names,
+            table.concat(sql_values, ", ")
+        )
+
+        local ok, err = db:exec(insert_sql)
+        if not ok and err then
+            print(string.format(
+                "Row %d insert failed: %s\nSQL: %s",
+                row_index, tostring(err), insert_sql
+            ))
+            -- continue to next row instead of stopping
+        end
     end
 
-    -- Complete the insert statement
-    insert_statement = insert_statement .. table.concat(value_rows, ", ") .. ";"
-
-    -- Execute the insert statement
-    local _, err = db:exec(insert_statement)
-    if err then
-        print("Error: " .. err)
-        db:close()
-        return nil
-    end
-
-    -- Close the database connection
     db:close()
     return true
 end
+
+-- local function load_df(db_path, table_name, dataframe)
+--     -- Check if the provided dataframe is valid
+--     if not dataframes.is_dataframe(dataframe) then
+--         error("The provided table is not a valid dataframe.")
+--     end
+
+--     -- Get the columns from the dataframe
+--     local columns = dataframes.get_columns(dataframe)
+    
+--     -- Open the SQLite database
+--     local db = sqlite.open(db_path)
+--     if not db then
+--         print("Error opening database")
+--         return nil
+--     end
+
+--     -- Prepare column names for the insert statement
+--     local col_row = table.concat(columns, "', '")
+--     local insert_statement = string.format("INSERT INTO %s ('%s') VALUES ", table_name, col_row)
+
+--     -- Prepare the data rows for insertion
+--     local value_rows = {}
+--     for _, row in ipairs(dataframe) do
+--         local sql_values = {}
+--         -- Get values for each column in the row
+--         for _, col_name in ipairs(columns) do
+--             local value = row[col_name]
+--             if value and value ~= "" then
+--                 table.insert(sql_values, string.format("'%s'", value))
+--             else
+--                 table.insert(sql_values, "NULL")
+--             end
+--         end
+--         -- Format the row values
+--         local row_values = string.format("(%s)", table.concat(sql_values, ", "))
+--         table.insert(value_rows, row_values)
+--     end
+
+--     -- Complete the insert statement
+--     insert_statement = insert_statement .. table.concat(value_rows, ", ") .. ";"
+
+--     -- Execute the insert statement
+--     local _, err = db:exec(insert_statement)
+--     if err then
+--         print("Error: " .. err)
+--         print("Insert Statement: " .. insert_statement)
+--         db:close()
+--         return nil
+--     end
+
+--     -- Close the database connection
+--     db:close()
+--     return true
+-- end
 
 local function get_tables(db_path)
 	local db = sqlite.open(db_path)
