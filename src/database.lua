@@ -11,16 +11,14 @@ local database = {}
 local function local_query(db_path, query)
     local db = sqlite.open(db_path)
     if not db then
-        print("Error opening database")
-        return nil
+        error("Error opening database")
     end
 
     query = utils.unescape_string(query)
     local stmt, err = db:prepare(query)
     if not stmt then
         db:close()
-        print("Invalid query: " .. err)
-        return nil, "Invalid query: " .. err
+        error("Invalid query: " .. err)
     end
 
     local result_rows = {}
@@ -36,7 +34,7 @@ local function local_query(db_path, query)
     db:close()
 
     if utils.length(result_rows) == 0 then
-        print("Query executed successfully, but no rows were returned.")
+        -- print("Query executed successfully, but no rows were returned.")
         return nil
     end
 
@@ -55,15 +53,13 @@ local function local_update(db_path, statement)
     local db = sqlite.open(db_path)
 
     if not db then
-        print("Error opening database")
-        return nil
+        error("Error opening database")
     end
     
     statement = utils.unescape_string(statement)
     local _, err = db:exec(statement)
     if err then
-        print("Error: " .. err)
-        return nil
+        error("Error: " .. err)
     end
 
     db:close()
@@ -87,14 +83,12 @@ end
 local function import_delimited(db_path, file_path, table_name, delimiter)    
     local db = sqlite.open(db_path)
     if not db then
-        print("Error opening database")
-        return nil
+        error("Error opening database")
     end
 
     local content = delimited_files.readdlm(file_path, delimiter, true)
     if not content then
-        print("Error reading delimited file")
-        return nil
+        error("Error reading delimited file")
     end
     
     local col_names = utils.keys(content[1]) -- problematic if first row does not have all the columns
@@ -111,8 +105,7 @@ local function import_delimited(db_path, file_path, table_name, delimiter)
 
     local _, err = db:exec(insert_statement)
     if err then
-        print("Error: " .. err)
-        return nil
+        error("Error: " .. err)
     end
 
     db:close()
