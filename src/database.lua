@@ -270,6 +270,71 @@ function get_columns(db_path, table_name)
     return columns
 end
 
+function get_table_info(db_path, table_name)
+    -- Open the database
+    local db = sqlite.open(db_path)
+    if not db then
+        error(("Failed to open database at %s"):format(db_path))
+    end
+
+    -- Collect column info
+    local columns = {}
+    local sql = ("PRAGMA table_info(%s);"):format(table_name)
+
+    for row in db:rows(sql) do
+        columns[#columns + 1] = {
+            name = row.name,
+            type = row.type,
+            notnull = row.notnull == 1,
+            default = row.dflt_value,
+            pk = row.pk == 1
+        }
+    end
+
+    db:close()
+    return columns
+end
+
+function get_schema(db_path)
+    local db = sqlite.open(db_path)
+    if not db then
+        error(("Failed to open database at %s"):format(db_path))
+    end
+
+    local schema = {}
+    -- Get all user tables
+    for row in db:rows("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';") do
+        local table_name = row.name
+        schema[table_name] = {}
+
+        local sql = ("PRAGMA table_info(%s);"):format(table_name)
+        for col in db:rows(sql) do
+            schema[table_name][#schema[table_name] + 1] = {
+                name = col.name,
+                type = col.type,
+                notnull = col.notnull == 1,
+                default = col.dflt_value,
+                pk = col.pk == 1
+            }
+        end
+    end
+
+    db:close()
+    return schema
+end
+
+-- function get_schema(db_path)
+--     local schema = {}
+--     local tables = get_tables(db_path)
+-- 
+--     for _, tname in ipairs(tables) do
+--         schema[tname] = get_table_info(db_path, tname)
+--     end
+-- 
+--     return schema
+-- end
+
+
 database.local_query = local_query
 database.local_update = local_update
 database.import_delimited = import_delimited
@@ -277,6 +342,8 @@ database.export_delimited = export_delimited
 database.load_df = load_df
 database.get_tables = get_tables
 database.get_columns = get_columns
+database.get_table_info = get_table_info
+database.get_schema = get_schema
 
 -- Export the module
 return database
