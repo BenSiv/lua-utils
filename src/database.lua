@@ -334,6 +334,77 @@ end
 --     return schema
 -- end
 
+local function compare_schemas(old_schema, new_schema)
+    local changes = {
+        tables_dropped = {},
+        tables_added = {},
+        tables_changed = {}
+    }
+
+    -- track tables dropped and changed
+    for tname, old_cols in pairs(old_schema) do
+        if not new_schema[tname] then
+            table.insert(changes.tables_dropped, tname)
+        else
+            -- compare columns
+            local new_cols = new_schema[tname]
+
+            local old_col_map = {}
+            for _, col in ipairs(old_cols) do
+                old_col_map[col.name] = col
+            end
+
+            local new_col_map = {}
+            for _, col in ipairs(new_cols) do
+                new_col_map[col.name] = col
+            end
+
+            local diff = { columns_added = {}, columns_dropped = {}, columns_changed = {} }
+
+            -- detect dropped and changed
+            for _, oldcol in ipairs(old_cols) do
+                local newcol = new_col_map[oldcol.name]
+                if not newcol then
+                    table.insert(diff.columns_dropped, oldcol.name)
+                else
+                    if oldcol.type ~= newcol.type or
+                       oldcol.notnull ~= newcol.notnull or
+                       oldcol.pk ~= newcol.pk or
+                       oldcol.default ~= newcol.default then
+                        diff.columns_changed[oldcol.name] = {
+                            old = oldcol,
+                            new = newcol
+                        }
+                    end
+                end
+            end
+
+            -- detect added
+            for _, newcol in ipairs(new_cols) do
+                if not old_col_map[newcol.name] then
+                    table.insert(diff.columns_added, newcol.name)
+                end
+            end
+
+            -- if there are any diffs, mark table as changed
+            if #diff.columns_added > 0 or
+               #diff.columns_dropped > 0 or
+               next(diff.columns_changed) ~= nil then
+                changes.tables_changed[tname] = diff
+            end
+        end
+    end
+
+    -- track tables added
+    for tname, _ in pairs(new_schema) do
+        if not old_schema[tname] then
+            table.insert(changes.tables_added, tname)
+        end
+    end
+
+    return changes
+end
+
 
 database.local_query = local_query
 database.local_update = local_update
@@ -344,6 +415,7 @@ database.get_tables = get_tables
 database.get_columns = get_columns
 database.get_table_info = get_table_info
 database.get_schema = get_schema
+database.compare_schemas = compare_schemas
 
 -- Export the module
 return database
