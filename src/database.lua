@@ -334,20 +334,32 @@ end
 --     return schema
 -- end
 
-local function compare_schemas(old_schema, new_schema)
+local function compare_schemas(old_schema, new_schema, rename_map)
     local changes = {
         tables_dropped = {},
         tables_added = {},
-        tables_changed = {}
+        tables_changed = {},
+        tables_renamed = {},
+        columns_renamed = {}
     }
 
-    -- track tables dropped and changed
-    for tname, old_cols in pairs(old_schema) do
-        if not new_schema[tname] then
-            table.insert(changes.tables_dropped, tname)
+    rename_map = rename_map or { tables = {}, columns = {} }
+
+    -- track tables dropped, renamed, or changed
+    for old_tname, old_cols in pairs(old_schema) do
+        local mapped_new_tname = rename_map.tables[old_tname]
+        local new_tname = new_schema[old_tname] and old_tname or mapped_new_tname
+
+        if not new_tname or not new_schema[new_tname] then
+            -- not found and no rename mapping
+            table.insert(changes.tables_dropped, old_tname)
         else
+            if mapped_new_tname then
+                changes.tables_renamed[old_tname] = mapped_new_tname
+            end
+
             -- compare columns
-            local new_cols = new_schema[tname]
+            local new_cols = new_schema[new_tname]
 
             local old_col_map = {}
             for _, col in ipairs(old_cols) do
@@ -359,19 +371,33 @@ local function compare_schemas(old_schema, new_schema)
                 new_col_map[col.name] = col
             end
 
-            local diff = { columns_added = {}, columns_dropped = {}, columns_changed = {} }
+            local diff = { 
+                columns_added = {}, 
+                columns_dropped = {}, 
+                columns_changed = {}, 
+                columns_renamed = {} 
+            }
 
-            -- detect dropped and changed
-            for _, oldcol in ipairs(old_cols) do
-                local newcol = new_col_map[oldcol.name]
+            local column_renames = rename_map.columns[old_tname] or {}
+
+            -- detect dropped, changed, and renamed columns
+            for old_colname, oldcol in pairs(old_col_map) do
+                local mapped_new_colname = column_renames[old_colname]
+                local newcol = new_col_map[old_colname] or (mapped_new_colname and new_col_map[mapped_new_colname])
+
                 if not newcol then
-                    table.insert(diff.columns_dropped, oldcol.name)
+                    table.insert(diff.columns_dropped, old_colname)
                 else
+                    if mapped_new_colname and old_colname ~= mapped_new_colname then
+                        diff.columns_renamed[old_colname] = mapped_new_colname
+                        changes.columns_renamed[old_tname .. "." .. old_colname] = mapped_new_colname
+                    end
+
                     if oldcol.type ~= newcol.type or
                        oldcol.notnull ~= newcol.notnull or
                        oldcol.pk ~= newcol.pk or
                        oldcol.default ~= newcol.default then
-                        diff.columns_changed[oldcol.name] = {
+                        diff.columns_changed[old_colname] = {
                             old = oldcol,
                             new = newcol
                         }
@@ -379,32 +405,48 @@ local function compare_schemas(old_schema, new_schema)
                 end
             end
 
-            -- detect added
+            -- detect added columns (not from rename)
             for _, newcol in ipairs(new_cols) do
                 if not old_col_map[newcol.name] then
-                    table.insert(diff.columns_added, newcol.name)
+                    local is_rename = false
+                    for _, mapped in pairs(column_renames) do
+                        if mapped == newcol.name then
+                            is_rename = true
+                            break
+                        end
+                    end
+                    if not is_rename then
+                        table.insert(diff.columns_added, newcol.name)
+                    end
                 end
             end
 
             -- if there are any diffs, mark table as changed
             if #diff.columns_added > 0 or
                #diff.columns_dropped > 0 or
-               next(diff.columns_changed) ~= nil then
-                changes.tables_changed[tname] = diff
+               next(diff.columns_changed) ~= nil or
+               next(diff.columns_renamed) ~= nil then
+                changes.tables_changed[new_tname] = diff
             end
         end
     end
 
-    -- track tables added
-    for tname, _ in pairs(new_schema) do
-        if not old_schema[tname] then
-            table.insert(changes.tables_added, tname)
+    -- track tables added (not from rename)
+    for new_tname, _ in pairs(new_schema) do
+        local is_rename = false
+        for _, mapped in pairs(rename_map.tables) do
+            if mapped == new_tname then
+                is_rename = true
+                break
+            end
+        end
+        if not old_schema[new_tname] and not is_rename then
+            table.insert(changes.tables_added, new_tname)
         end
     end
 
     return changes
 end
-
 
 database.local_query = local_query
 database.local_update = local_update

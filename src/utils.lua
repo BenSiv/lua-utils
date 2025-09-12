@@ -648,16 +648,54 @@ local function exec_command(command)
 end
 
 local function breakpoint()
-  local level = 2  -- 1 would be inside this function, 2 is the caller
-  local i = 1
-  while true do
-    local name, value = debug.getlocal(level, i)
-    if not name then break end
-    _G[name] = value
-    i = i + 1
-  end
-  debug.debug()
+    local level = 2  -- 1 would be inside this function, 2 is the caller
+    local i = 1
+    while true do
+        local name, value = debug.getlocal(level, i)
+        if not name then break end
+        _G[name] = value
+        i = i + 1
+    end
+    debug.debug()
 end
+
+-- local function breakpoint()
+--     local level = 2  -- caller stack frame
+--     local i = 1
+--     while true do
+--         local name, value = debug.getlocal(level, i)
+--         if not name then break end
+--         _G[name] = value
+--         i = i + 1
+--     end
+
+--     while true do
+--         io.write("debug> ")
+--         local line = io.read("*line")
+
+--         if line == "" then
+--             -- Exiting debug shell, continuing execution
+--             return
+--         elseif line == nil then
+--             -- Exiting debug shell, exit program entirely
+--             os.exit(0)
+--         else
+--             local chunk, err = load(line, "=(debug repl)")
+--             if chunk then
+--                 local ok, res = pcall(chunk)
+--                 if ok then
+--                     if res ~= nil then
+--                         print(res)
+--                     end
+--                 else
+--                     print("Error:", res)
+--                 end
+--             else
+--                 print("Compile error:", err)
+--             end
+--         end
+--     end
+-- end
 
 local function show_methods(obj)
     for key, value in pairs(obj) do
