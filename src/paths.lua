@@ -57,9 +57,15 @@ local function joinpath(...)
 end
 
 -- Function to add relative path to package.path
-local function add_to_path(script_path, relative_path)
-    local script_dir = get_parent_dir(script_path)
-    path_to_add = joinpath(script_dir, relative_path, "?.lua;")
+-- local function add_to_path(script_path, relative_path)
+--     local script_dir = get_parent_dir(script_path)
+--     path_to_add = joinpath(script_dir, relative_path, "?.lua;")
+--     package.path = path_to_add .. package.path
+-- end
+
+-- Function to add absolute path to package.path
+local function add_to_path(path)
+    path_to_add = joinpath(path, "?.lua;")
     package.path = path_to_add .. package.path
 end
 
