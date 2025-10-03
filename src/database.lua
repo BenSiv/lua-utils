@@ -348,10 +348,10 @@ local function compare_schemas(old_schema, new_schema, rename_map)
     -- track tables dropped, renamed, or changed
     for old_tname, old_cols in pairs(old_schema) do
         local mapped_new_tname = rename_map.tables[old_tname]
-        local new_tname = new_schema[old_tname] and old_tname or mapped_new_tname
+        local new_tname = mapped_new_tname or old_tname
 
-        if not new_tname or not new_schema[new_tname] then
-            -- not found and no rename mapping
+        if not new_schema[new_tname] then
+            -- not found in new schema
             table.insert(changes.tables_dropped, old_tname)
         else
             if mapped_new_tname then
@@ -434,13 +434,15 @@ local function compare_schemas(old_schema, new_schema, rename_map)
     -- track tables added (not from rename)
     for new_tname, _ in pairs(new_schema) do
         local is_rename = false
-        for _, mapped in pairs(rename_map.tables) do
+        local table_renames = rename_map.tables or {}
+        for _, mapped in pairs(table_renames) do
             if mapped == new_tname then
                 is_rename = true
                 break
             end
         end
-        if not old_schema[new_tname] and not is_rename then
+        
+        if new_tname and not old_schema[new_tname] and not is_rename then
             table.insert(changes.tables_added, new_tname)
         end
     end
