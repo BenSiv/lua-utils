@@ -1,0 +1,112 @@
+-- mygnuplot_procedural.lua
+
+local gnuplot = {}
+
+local temp_files = {}
+
+local function write_temp_file(content)
+    local fname = os.tmpname()
+    local f = io.open(fname, "w")
+    f:write(content)
+    f:close()
+    table.insert(temp_files, fname)
+    return fname
+end
+
+-- convert Lua arrays to temporary data file
+local function array_to_file(arr)
+    -- arr should be { {x1, x2, ...}, {y1, y2, ...}, ... }
+    assert(#arr > 0, "Input array is empty")
+    local n = #arr[1]  -- number of points
+    local lines = {}
+    
+    for i = 1, n do
+        local line = {}
+        for j = 1, #arr do
+            local v = arr[j][i]
+            if type(v) == "string" then
+                v = v:gsub('"', '')  -- remove quotes if present
+            end
+            line[j] = v ~= nil and tostring(v) or "NaN"
+        end
+        table.insert(lines, table.concat(line, " "))
+    end
+    
+    -- write to temporary file
+    local tmpname = os.tmpname()
+    local f = assert(io.open(tmpname, "w"))
+    f:write(table.concat(lines, "\n"))
+    f:close()
+    return tmpname
+end
+
+-- create a plot object (data + config)
+function gnuplot.create(cfg)
+    cfg = cfg or {}
+    local plot = {}
+    plot.cfg = {}
+    for k,v in pairs(cfg) do
+        plot.cfg[k] = v
+    end
+
+    plot.cfg.data = plot.cfg.data or {}
+    -- process arrays in data
+    for i, d in ipairs(plot.cfg.data) do
+        if type(d[1]) == "table" then
+            d[1] = array_to_file(d[1])
+            d.file = true
+        end
+    end
+
+    return plot
+end
+
+-- generate gnuplot commands
+local function generate_code(plot, cmd, output_path)
+    local cfg = plot.cfg
+    local code = {}
+
+    -- terminal + output
+    table.insert(code, string.format('set terminal %s size %d,%d', cfg.type or "pngcairo", cfg.width or 800, cfg.height or 600))
+    if output_path then
+        table.insert(code, string.format('set output "%s"', output_path))
+    end
+
+    -- time series support
+    if cfg.xformat then
+        table.insert(code, 'set xdata time')
+        table.insert(code, 'set timefmt "'..cfg.xformat..'"')   -- how to parse input
+        table.insert(code, 'set format x "'..cfg.xformat..'"')  -- how to display
+    end
+
+    -- labels and grid
+    if cfg.title then table.insert(code, 'set title "'..cfg.title..'"') end
+    if cfg.xlabel then table.insert(code, 'set xlabel "'..cfg.xlabel..'"') end
+    if cfg.ylabel then table.insert(code, 'set ylabel "'..cfg.ylabel..'"') end
+    if cfg.grid then table.insert(code, 'set grid') end
+    if cfg.xtics then table.insert(code, 'set xtics '..cfg.xtics) end
+
+    -- plot command
+    local plots = {}
+    for _, d in ipairs(cfg.data) do
+        local line = '"'..d[1]..'"'
+        if d.using then
+            line = line .. " using " .. table.concat(d.using, ":")
+        end
+        if d.with then line = line .. " w " .. d.with end
+        if d.title then line = line .. ' t "'..d.title..'"' end
+        table.insert(plots, line)
+    end
+    table.insert(code, cmd.." "..table.concat(plots, ", "))
+
+    return table.concat(code, "\n")
+end
+
+-- save plot to file
+function gnuplot.savefig(plot, output_path)
+    local code = generate_code(plot, "plot", output_path)
+    local tmp = write_temp_file(code)
+    os.execute("gnuplot " .. tmp)
+end
+
+return gnuplot
