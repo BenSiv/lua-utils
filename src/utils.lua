@@ -59,38 +59,47 @@ local function write(path, content, append)
     end
 end
 
--- Pretty print a table
-local function show_table(tbl, indent_level)
+-- Pretty print a table with limit
+local function show_table(tbl, indent_level, limit)
     indent_level = indent_level or 0
+    limit = limit or math.huge  -- if limit not provided, show all
     local indent = repeat_string(" ", 4)
     local current_indent = repeat_string(indent, indent_level)
     print(current_indent .. "{")
     indent_level = indent_level + 1
-    local current_indent = repeat_string(indent, indent_level)
+    current_indent = repeat_string(indent, indent_level)
+
+    local count = 0
     for key, value in pairs(tbl) do
+        count = count + 1
+        if count > limit then
+            print(current_indent .. "... (" .. (#tbl - limit) .. " more entries)")
+            break
+        end
+
         if type(value) ~= "table" then
             if type(value) == "boolean" then
                 print(current_indent .. key .. " = " .. tostring(value))
             else
-                print(current_indent .. key .. " = " .. value)
+                print(current_indent .. key .. " = " .. tostring(value))
             end
         else
             print(current_indent .. key .. " = ")
-            show_table(value, indent_level)
+            show_table(value, indent_level, limit)
         end
     end
+
     indent_level = indent_level - 1
-    local current_indent = repeat_string(indent, indent_level)
+    current_indent = repeat_string(indent, indent_level)
     print(current_indent .. "}")
 end
 
-
--- Pretty print generic
-local function show(object)
+-- Pretty print generic with optional limit
+local function show(object, limit)
     if type(object) ~= "table" then
         print(object)
     else
-        show_table(object)
+        show_table(object, 0, limit)
     end
 end
 

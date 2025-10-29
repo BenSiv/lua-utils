@@ -1,8 +1,5 @@
 local gp = require("gnuplot")
 
-local plot_obj = gp.create(plot_cfg)
-gp.savefig(plot_obj, "/root/monthly_rate.png")
-
 -- === Test ===
 -- local x = {1, 2, 3, 4, 5}
 -- local y = {10, 20, 30, 40, 50}
@@ -22,7 +19,7 @@ gp.savefig(plot_obj, "/root/monthly_rate.png")
 local dates = {"2025-10-20", "2025-10-21", "2025-10-22"}
 local values = {1.2, 3.4, 2.8}
 
-local plot = gp.create({
+local plot_cfg = {
     data = {
         {
             {
@@ -42,7 +39,11 @@ local plot = gp.create({
     xformat = "%Y-%m-%d",
     grid = true,
     xtics = "rotate by -45"
-})
+}
 
-gp.savefig(plot, "time_series.png")
+-- gp.savefig(plot, "time_series.png")
+local plot_obj = gp.create(plot_cfg)
+local code = gp.generate_code(plot_obj, "plot", output_path)
+print(code)
 
+gp.savefig(plot_obj, "time_series.png")

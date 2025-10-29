@@ -1,5 +1,7 @@
 -- mygnuplot_procedural.lua
 
+local exec_command = require("utils").exec_command
+
 local gnuplot = {}
 
 local temp_files = {}
@@ -41,7 +43,7 @@ local function array_to_file(arr)
 end
 
 -- create a plot object (data + config)
-function gnuplot.create(cfg)
+local function create(cfg)
     cfg = cfg or {}
     local plot = {}
     plot.cfg = {}
@@ -103,10 +105,28 @@ local function generate_code(plot, cmd, output_path)
 end
 
 -- save plot to file
-function gnuplot.savefig(plot, output_path)
+-- local function savefig(plot, output_path)
+--     local code = generate_code(plot, "plot", output_path)
+--     local tmp = write_temp_file(code)
+--     os.execute("gnuplot " .. tmp)
+-- end
+
+local function savefig(plot, output_path)
     local code = generate_code(plot, "plot", output_path)
     local tmp = write_temp_file(code)
-    os.execute("gnuplot " .. tmp)
+    
+    -- Use exec_command instead of os.execute
+    local output, ok = exec_command("gnuplot " .. tmp)
+    
+    if not ok then
+        return false, output, tmp  -- Failed: return false + gnuplot output
+    end
+    
+    return true, output, tmp       -- Success: return true + gnuplot output
 end
+
+gnuplot.create = create
+gnuplot.savefig = savefig
+gnuplot.generate_code = generate_code
 
 return gnuplot
