@@ -88,6 +88,25 @@ local function generate_code(plot, cmd, output_path)
     if cfg.grid then table.insert(code, 'set grid') end
     if cfg.xtics then table.insert(code, 'set xtics '..cfg.xtics) end
 
+    -- axis ranges
+    if cfg.xrange then
+        local xr = cfg.xrange
+        if type(xr) == "table" then
+            table.insert(code, string.format("set xrange [%s:%s]", xr[1], xr[2]))
+        else
+            table.insert(code, "set xrange " .. xr)
+        end
+    end
+
+    if cfg.yrange then
+        local yr = cfg.yrange
+        if type(yr) == "table" then
+            table.insert(code, string.format("set yrange [%s:%s]", yr[1], yr[2]))
+        else
+            table.insert(code, "set yrange " .. yr)
+        end
+    end
+
     -- plot command
     local plots = {}
     for _, d in ipairs(cfg.data) do
