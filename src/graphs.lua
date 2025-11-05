@@ -1,4 +1,4 @@
--- Define a module table
+-- graphs.lua
 local graphs = {}
 
 -- Switch keys and values
@@ -7,7 +7,6 @@ local function reverse_kv(tbl)
         print("Expected table, received " .. type(tbl))
         return {}
     end
-
     local reversed = {}
     for k, v in pairs(tbl) do
         reversed[v] = k
@@ -15,208 +14,163 @@ local function reverse_kv(tbl)
     return reversed
 end
 
--- Function to get or create an index for a given name
+-- Get or create an index for a name
 local function get_or_create_index(name, node_map)
-    local index_map = reverse_kv(node_map)  -- Reverse lookup for names
+    local index_map = reverse_kv(node_map)
     local node_index = index_map[name]
-
     if not node_index then
-        node_index = #node_map + 1  -- Assign a new index
+        node_index = #node_map + 1
         node_map[node_index] = name
     end
     return node_index
 end
 
--- Build the graph as an adjacency list while also returning a node-map {index = name}
+-- Get index of a node name
+local function get_node_index(node_map, node_name)
+    for index, name in pairs(node_map) do
+        if name == node_name then return index end
+    end
+    return nil
+end
+
+-- Build a DAG as adjacency list
 local function build_graph(data)
     local graph = {}
     local node_map = {}
-
     for _, entry in ipairs(data) do
-        local source_index = get_or_create_index(entry.source, node_map)
-        local name_index = get_or_create_index(entry.name, node_map)
-
-        if not graph[source_index] then
-            graph[source_index] = {}
-        end
-        table.insert(graph[source_index], name_index)
+        local src_idx = get_or_create_index(entry.source, node_map)
+        local name_idx = get_or_create_index(entry.name, node_map)
+        graph[src_idx] = graph[src_idx] or {}
+        table.insert(graph[src_idx], name_idx)
     end
-
     return graph, node_map
 end
 
--- Function to find all children of a specific node
-local function get_all_children(graph, node_map, node_name)
+-- Build reverse graph once for parent traversal
+local function build_reverse_graph(graph)
+    local reversed = {}
+    for parent, children in pairs(graph) do
+        for _, child in ipairs(children) do
+            reversed[child] = reversed[child] or {}
+            table.insert(reversed[child], parent)
+        end
+    end
+    return reversed
+end
+
+-- Generic DFS traversal
+local function traverse_graph(graph, start_node, reverse)
+    local g = graph
+    if reverse then g = build_reverse_graph(graph) end
     local visited = {}
-    local children_indices = {}
-    local node = get_or_create_index(node_name, node_map)
+    local result = {}
 
-    local function dfs(curr_node)
-        if visited[curr_node] then return end
-        visited[curr_node] = true
-
-        if graph[curr_node] then
-            for _, neighbor in ipairs(graph[curr_node]) do
+    local function dfs(curr)
+        if visited[curr] then return end
+        visited[curr] = true
+        if g[curr] then
+            for _, neighbor in ipairs(g[curr]) do
                 if not visited[neighbor] then
-                    table.insert(children_indices, neighbor)
+                    table.insert(result, neighbor)
                     dfs(neighbor)
                 end
             end
         end
     end
 
-    dfs(node)
+    dfs(start_node)
+    return result
+end
 
-    -- Convert indices back to names
+-- Get all children
+local function get_all_children(graph, node_map, node_name)
+    local idx = get_node_index(node_map, node_name)
+    if not idx then return {} end
+    local indices = traverse_graph(graph, idx, false)
     local children = {}
-    for _, index in ipairs(children_indices) do
-        table.insert(children, node_map[index])
-    end
-
+    for _, i in ipairs(indices) do table.insert(children, node_map[i]) end
     return children
 end
 
--- Function to build a reverse adjacency list for quick parent lookup
-local function build_reverse_graph(graph)
-    if type(graph) ~= "table" then
-        print("Expected table, received " .. type(graph))
-        return
-    end
-    local reversed_graph = {}
-    for parent, children in pairs(graph) do
-        for _, child in ipairs(children) do
-            if not reversed_graph[child] then
-                reversed_graph[child] = {}
-            end
-            table.insert(reversed_graph[child], parent)  -- Preserve order
-        end
-    end
-    return reversed_graph
-end
-
--- Function to find all parents of a specific node
+-- Get all parents
 local function get_all_parents(graph, node_map, node_name)
-    local visited = {}
-    local parents_indices = {}
-    local node = get_or_create_index(node_name, node_map)
-
-    -- Reverse graph
-    local reversed_graph = build_reverse_graph(graph)
-    for parent, children in pairs(graph) do
-        for _, child in ipairs(children) do
-            if not reversed_graph[child] then
-                reversed_graph[child] = {}
-            end
-            table.insert(reversed_graph[child], parent)
-        end
-    end
-
-    local function dfs(curr_node)
-        if visited[curr_node] then return end
-        visited[curr_node] = true
-
-        if reversed_graph[curr_node] then
-            for _, parent in ipairs(reversed_graph[curr_node]) do
-                if not visited[parent] then
-                    table.insert(parents_indices, parent)
-                    dfs(parent)
-                end
-            end
-        end
-    end
-
-    dfs(node)
-
-    -- Convert indices back to names
+    local idx = get_node_index(node_map, node_name)
+    if not idx then return {} end
+    local indices = traverse_graph(graph, idx, true)
     local parents = {}
-    for _, index in ipairs(parents_indices) do
-        table.insert(parents, node_map[index])
-    end
-
+    for _, i in ipairs(indices) do table.insert(parents, node_map[i]) end
     return parents
 end
 
--- Function to find all leaf nodes (nodes with no outgoing edges)
+-- Get leaves (nodes with no outgoing edges)
 local function get_leaves(graph, node_map)
     local has_outgoing = {}
-    local all_nodes = {}
-
-    -- Mark nodes that have outgoing edges
     for node, edges in pairs(graph) do
         has_outgoing[node] = true
-        for _, child in ipairs(edges) do
-            all_nodes[child] = true
-        end
     end
-
-    -- Any node that is in node_map but not in has_outgoing is a leaf
     local leaves = {}
-    for index, name in pairs(node_map) do
-        if not has_outgoing[index] then
-            table.insert(leaves, name)
-        end
+    for idx, name in pairs(node_map) do
+        if not has_outgoing[idx] then table.insert(leaves, name) end
     end
-
     return leaves
 end
 
-function get_roots(graph, node_map)
-    local reversed_graph = build_reverse_graph(graph)
-    if not reversed_graph then
-        return 
-    end
+-- Get roots (nodes with no parents)
+local function get_roots(graph, node_map)
+    local reversed = build_reverse_graph(graph)
     local roots = {}
-
-    for node, _ in pairs(node_map) do
-        if not reversed_graph[node] or next(reversed_graph[node]) == nil then
-            table.insert(roots, node_map[node])
-        end
+    for idx, name in pairs(node_map) do
+        if not reversed[idx] or #reversed[idx] == 0 then table.insert(roots, name) end
     end
-
     return roots
 end
 
--- Function to get the index of a node name
-local function get_node_index(node_map, node_name)
-    for index, name in pairs(node_map) do
-        if name == node_name then
-            return index
-        end
-    end
-    return nil
-end
-
--- Function to get all components (connected nodes) in a DAG
+-- Get connected components
 local function get_all_components(graph, node_map)
     local visited = {}
     local components = {}
-
-    -- DFS to collect nodes in a component
-    local function dfs(node, component)
+    local function dfs(node, comp)
         if visited[node] then return end
         visited[node] = true
-        table.insert(component, node_map[node])
-
+        table.insert(comp, node_map[node])
         if graph[node] then
-            for _, neighbor in ipairs(graph[node]) do
-                dfs(neighbor, component)
-            end
+            for _, n in ipairs(graph[node]) do dfs(n, comp) end
         end
     end
-
-    -- Iterate through all nodes in node_map
-    for index, _ in pairs(node_map) do
-        if not visited[index] then
-            local component = {}
-            dfs(index, component)
-            table.insert(components, component)
+    for idx, _ in pairs(node_map) do
+        if not visited[idx] then
+            local comp = {}
+            dfs(idx, comp)
+            table.insert(components, comp)
         end
     end
-
     return components
 end
 
--- Export module functions
+-- Get lineage depth
+local function get_lineage_depth(graph, node_map, sample_name)
+    local node_idx = get_node_index(node_map, sample_name)
+    if not node_idx then return nil end
+    local reversed = build_reverse_graph(graph)
+
+    local function depth(curr, visited)
+        visited = visited or {}
+        if visited[curr] then return 0 end
+        visited[curr] = true
+        local parents = reversed[curr] or {}
+        if #parents == 0 then return -1 end
+        local max_depth = -math.huge
+        for _, p in ipairs(parents) do
+            local d = depth(p, visited)
+            if d > max_depth then max_depth = d end
+        end
+        return max_depth + 1
+    end
+
+    return depth(node_idx)
+end
+
+-- Exports
 graphs.build_graph = build_graph
 graphs.get_all_children = get_all_children
 graphs.get_all_parents = get_all_parents
@@ -224,5 +178,6 @@ graphs.get_leaves = get_leaves
 graphs.get_roots = get_roots
 graphs.get_node_index = get_node_index
 graphs.get_all_components = get_all_components
+graphs.get_lineage_depth = get_lineage_depth
 
 return graphs
