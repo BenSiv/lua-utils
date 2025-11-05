@@ -147,23 +147,33 @@ local function get_all_components(graph, node_map)
     return components
 end
 
--- Get lineage depth
+-- Get lineage depth: root = 0, subcultures increment, invalid = -1
 local function get_lineage_depth(graph, node_map, sample_name)
     local node_idx = get_node_index(node_map, sample_name)
-    if not node_idx then return nil end
+    if not node_idx then return -1 end  -- invalid node
+
     local reversed = build_reverse_graph(graph)
 
     local function depth(curr, visited)
         visited = visited or {}
-        if visited[curr] then return 0 end
+        if visited[curr] then return -1 end  -- cycle detected, treat as invalid
         visited[curr] = true
+
         local parents = reversed[curr] or {}
-        if #parents == 0 then return -1 end
-        local max_depth = -math.huge
+        if #parents == 0 then
+            return 0  -- root node
+        end
+
+        local max_depth = 0
         for _, p in ipairs(parents) do
             local d = depth(p, visited)
+            if d == -1 then
+                -- invalid parent, propagate invalid
+                return -1
+            end
             if d > max_depth then max_depth = d end
         end
+
         return max_depth + 1
     end
 
