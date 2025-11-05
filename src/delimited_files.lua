@@ -83,7 +83,7 @@ local function readdlm(filename, delimiter, header)
 end
 
 -- Writes a delimited file from a table
-local function writedlm(filename, delimiter, data, header, append, column_order)
+local function writedlm(data, filename, delimiter, header, append, column_order)
     local file
 
     if append then
