@@ -1,6 +1,20 @@
 -- Define a module table
 local paths = {}
 
+-- Capture the path of the file that required this module
+do
+    local info = debug.getinfo(4, "S") or debug.getinfo(3, "S")
+    if info and info.source:sub(1, 1) == "@" then
+        paths._caller_script = info.source:sub(2)
+    else
+        paths._caller_script = nil
+    end
+end
+
+local function get_script_path()
+    return paths._caller_script
+end
+
 local function get_parent_dir(path)
     path = path:gsub("[\\/]+$", "")
     local parent_dir = path:match("(.*/)")
@@ -27,11 +41,6 @@ local function get_dir_name(path)
 		dir_name = get_file_name(path)
 	end
 	return dir_name
-end
-
-local function get_script_path()
-    local script_path = debug.getinfo(1, "S").source:sub(2)
-    return script_path
 end
 
 local function get_script_dir()
