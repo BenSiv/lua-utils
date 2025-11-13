@@ -41,8 +41,20 @@ local function split(str, delimiter)
     return result
 end
 
-local function strip(str)
-    return (str:gsub("%s+$", ""))
+-- local function strip(str)
+--     return (str:gsub("%s+$", ""))
+-- end
+
+-- robust strip for Lua 5.1: removes ASCII spaces plus common UTF-8 invisible chars
+local function strip(s)
+    if not s then return s end
+    -- remove leading BOM if present
+    s = s:gsub("^\239\187\191", "")
+    -- remove leading ascii whitespace, NBSP (U+00A0), and ZWSP (U+200B)
+    s = s:gsub("^[%s\194\160\226\128\139]+", "")
+    -- remove trailing ascii whitespace, NBSP, and ZWSP
+    s = s:gsub("[%s\194\160\226\128\139]+$", "")
+    return s
 end
 
 -- Escape special characters string
