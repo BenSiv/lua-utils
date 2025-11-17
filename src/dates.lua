@@ -121,7 +121,7 @@ end
 
 local function disect_datetime(input_datetime)
     local year, month, day, hour, minute, second = input_datetime:match("(%d+)-(%d+)-(%d+)-(%d+)-(%d+)-(%d+)")
-    return year, month, day, hour, minute, second
+    return {year, month, day, hour, minute, second}
 end
 
 local function get_day(input_date)
