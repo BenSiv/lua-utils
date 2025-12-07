@@ -59,12 +59,12 @@ end
 
 -- Escape special characters string
 local function escape_string(str)
-    local new_str = str:gsub("[%[%]%(%)%.%+%-%*%%]", "%%%1")
+    local new_str = str:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1")
     return new_str
 end
 
 local function unescape_string(str)
-    local new_str = str:gsub("%%([%[%]%(%)%.%+%-%*%%])", "%1")
+    local new_str = str:gsub("%%([%(%)%.%%%+%-%*%?%[%]%^%$])", "%1")
     return new_str
 end
 

@@ -243,7 +243,6 @@ end
 
 -- Returns new table with replaced value
 local function replace_string(str, old, new)
-    old = escape_string(old)
     local output_str = str:gsub(old, new)
     return output_str
 end
