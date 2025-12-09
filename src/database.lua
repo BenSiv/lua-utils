@@ -13,6 +13,7 @@ local function local_query(db_path, query)
     if not db then
         error("Error opening database")
     end
+    db:exec("PRAGMA busy_timeout = 5000;")
 
     query = utils.unescape_string(query)
     local stmt, err = db:prepare(query)
@@ -55,6 +56,7 @@ local function local_update(db_path, statement)
     if not db then
         error("Error opening database")
     end
+    db:exec("PRAGMA busy_timeout = 5000;")
     
     statement = utils.unescape_string(statement)
     local _, err = db:exec(statement)
@@ -125,7 +127,7 @@ local function export_delimited(db_path, query, file_path, delimiter, header)
         return nil
     end
 
-    delimited_files.writedlm(file_path, delimiter, results, header)
+    delimited_files.writedlm(results, file_path, delimiter, header)
     return true
 end
 
