@@ -648,11 +648,30 @@ local function get_line_length()
     return 80 -- Fallback to default width
 end
 
+local function command_succeeded(ok, why, code)
+    if type(ok) == "number" then
+        return ok == 0
+    end
+    if type(ok) == "boolean" then
+        if why == "exit" and type(code) == "number" then
+            return ok and code == 0
+        end
+        return ok
+    end
+    return false
+end
+
 local function exec_command(command)
-    local process = io.popen(command)  -- Only stdout is captured here
-    local output = process:read("*a")  -- Read the output
-    local success = process:close()  -- Close the process and check for success
-    return output, success
+    local tmpfile = os.tmpname()
+    local ok, why, code = os.execute(command .. " > " .. tmpfile .. " 2>&1")
+    local output = ""
+    local file = io.open(tmpfile, "r")
+    if file then
+        output = file:read("*a") or ""
+        file:close()
+    end
+    os.remove(tmpfile)
+    return output, command_succeeded(ok, why, code)
 end
 
 local function breakpoint()
